@@ -19,6 +19,7 @@
     --blue-dim:#1a3a7a;
     --line:#232323;
     --muted:#8a8a86;
+    --radius:16px;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{ scroll-behavior:smooth; }
@@ -48,14 +49,28 @@
     z-index:1;
   }
 
-  /* --- Entrance animation --- */
-  @keyframes fadeUp{
-    from{ opacity:0; transform:translateY(14px); }
-    to{ opacity:1; transform:translateY(0); }
+  /* --- Scroll reveal --- */
+  .reveal{
+    opacity:0;
+    transform:translateY(18px);
+    transition:opacity .6s cubic-bezier(.22,.9,.3,1), transform .6s cubic-bezier(.22,.9,.3,1);
   }
-  .reveal{ opacity:0; animation:fadeUp .6s cubic-bezier(.22,.9,.3,1) forwards; }
+  .reveal.visible{ opacity:1; transform:translateY(0); }
   @media (prefers-reduced-motion: reduce){
-    .reveal{ opacity:1; animation:none; }
+    .reveal{ opacity:1; transform:none; transition:none; }
+  }
+
+  /* --- Shared panel style (identidade visual única) --- */
+  .panel{
+    background:var(--bg-alt);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    transition:transform .2s cubic-bezier(.22,.9,.3,1), border-color .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .panel:hover{
+    transform:translateY(-2px);
+    border-color:var(--blue);
+    box-shadow:0 10px 26px -10px rgba(59,126,255,.32);
   }
 
   /* --- Banner --- */
@@ -103,20 +118,12 @@
   }
   .avatar img{width:100%;height:100%;object-fit:cover; display:block;}
 
-  .name-row{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:7px;
-  }
   h1{
     font-family:'Archivo Black', sans-serif;
     font-size:27px;
     letter-spacing:-0.5px;
     text-transform:uppercase;
   }
-  .verified{ flex-shrink:0; transform:translateY(1px); }
-
   .role{
     font-family:'JetBrains Mono', monospace;
     font-size:12px;
@@ -148,7 +155,7 @@
     flex-wrap:wrap;
     justify-content:center;
     gap:8px;
-    margin:18px auto 0;
+    margin:32px auto 0;
     max-width:340px;
   }
   .proof-chip{
@@ -165,8 +172,14 @@
   }
   .proof-chip svg{ flex-shrink:0; }
 
-  /* --- Main CTA --- */
-  .cta-wrap{ padding:28px 24px 0; }
+  /* --- CTAs --- */
+  .cta-wrap{ padding:28px 24px 0; display:flex; flex-direction:column; gap:12px; }
+
+  @keyframes ctaPulse{
+    0%{ box-shadow:0 0 0 0 rgba(59,126,255,.45); }
+    70%{ box-shadow:0 0 0 14px rgba(59,126,255,0); }
+    100%{ box-shadow:0 0 0 0 rgba(59,126,255,0); }
+  }
   .cta{
     position:relative;
     display:flex;
@@ -175,15 +188,17 @@
     padding:18px 20px;
     background:linear-gradient(155deg, #16274d, #101010 65%);
     border:1px solid var(--blue-dim);
-    border-radius:18px;
+    border-radius:var(--radius);
     text-decoration:none;
     color:var(--paper);
     transition:transform .22s cubic-bezier(.22,.9,.3,1), border-color .22s ease, box-shadow .22s ease;
+    animation:ctaPulse 2.8s infinite;
   }
   .cta:hover{
     transform:translateY(-3px);
     border-color:var(--blue);
     box-shadow:0 12px 32px -8px rgba(59,126,255,.4);
+    animation-play-state:paused;
   }
   .cta:active{ transform:translateY(-1px); }
 
@@ -202,42 +217,116 @@
   .cta-text{ flex:1; }
   .cta-title{ font-weight:800; font-size:17.5px; letter-spacing:-.2px; }
   .cta-sub{ font-family:'Inter', sans-serif; font-weight:500; font-size:13px; color:var(--text-soft); margin-top:4px; line-height:1.35; }
-  .cta-arrow{
-    color:var(--blue);
-    font-size:20px;
-    transition:transform .22s cubic-bezier(.22,.9,.3,1);
-  }
+  .cta-arrow{ color:var(--blue); font-size:20px; transition:transform .22s cubic-bezier(.22,.9,.3,1); }
   .cta:hover .cta-arrow{ transform:translateX(4px); }
 
-  /* --- Sobre --- */
-  .sobre{
-    margin:36px 24px 0;
-    padding:20px 20px;
-    background:var(--bg-alt);
-    border:1px solid var(--line);
-    border-radius:16px;
-  }
-  .sobre-eyebrow{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
+  .cta-secondary{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:15px 20px;
+    background:transparent;
+    border:1px solid var(--blue-dim);
+    border-radius:var(--radius);
+    text-decoration:none;
     color:var(--blue);
-    text-transform:uppercase;
-    letter-spacing:1.5px;
-    margin-bottom:8px;
+    font-weight:700;
+    font-size:14.5px;
+    transition:transform .2s cubic-bezier(.22,.9,.3,1), border-color .2s ease, background .2s ease;
   }
+  .cta-secondary:hover{
+    transform:translateY(-2px);
+    border-color:var(--blue);
+    background:rgba(59,126,255,.08);
+  }
+
+  /* --- Section title with icon --- */
+  .sec-title{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin-bottom:12px;
+  }
+  .sec-title .ic{
+    width:28px; height:28px;
+    border-radius:8px;
+    background:#0a0a0a;
+    border:1px solid var(--blue-dim);
+    color:var(--blue);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .sec-title h2{
+    font-size:14px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.8px;
+  }
+
+  /* --- Sobre --- */
+  .sobre{ margin:36px 24px 0; padding:20px; }
   .sobre p{
     font-size:13.5px;
     color:var(--text-soft);
-    line-height:1.65;
+    line-height:1.7;
   }
+  .sobre p + p{ margin-top:10px; }
 
-  /* --- Divider --- */
-  .divider{
+  /* --- Como funciona --- */
+  .steps-wrap{ margin:36px 24px 0; }
+  .steps{ display:flex; flex-direction:column; gap:10px; }
+  .step{
     display:flex;
     align-items:center;
-    gap:10px;
-    margin:32px 24px 16px;
+    gap:14px;
+    padding:14px 16px;
   }
+  .step-num{
+    flex-shrink:0;
+    width:34px; height:34px;
+    border-radius:10px;
+    background:#0a0a0a;
+    border:1px solid var(--blue-dim);
+    color:var(--blue);
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .step-title{ font-weight:600; font-size:13.5px; }
+  .step-sub{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+  /* --- Depoimentos --- */
+  .testi-wrap{ margin:36px 24px 0; }
+  .testi{
+    padding:18px;
+    margin-bottom:12px;
+  }
+  .testi:last-child{ margin-bottom:0; }
+  .testi-quote{ color:var(--blue); opacity:.5; margin-bottom:6px; }
+  .testi p{ font-size:13.5px; color:var(--text-soft); line-height:1.6; font-style:italic; }
+  .testi-author{ display:flex; align-items:center; gap:8px; margin-top:12px; }
+  .testi-avatar{
+    width:30px; height:30px;
+    border-radius:50%;
+    background:linear-gradient(145deg,#1e1e1e,#0a0a0a);
+    border:1px solid var(--blue-dim);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Archivo Black', sans-serif;
+    font-size:11px;
+    color:var(--blue);
+    flex-shrink:0;
+  }
+  .testi-name{ font-size:12.5px; font-weight:700; }
+  .testi-role{ font-size:11px; color:var(--muted); }
+
+  /* --- Divider --- */
+  .divider{ display:flex; align-items:center; gap:10px; margin:36px 24px 16px; }
   .divider span{
     font-family:'JetBrains Mono', monospace;
     font-size:11px;
@@ -246,36 +335,17 @@
     letter-spacing:2px;
     white-space:nowrap;
   }
-  .divider::before, .divider::after{
-    content:'';
-    height:1px;
-    flex:1;
-    background:var(--line);
-  }
+  .divider::before, .divider::after{ content:''; height:1px; flex:1; background:var(--line); }
 
   /* --- Service grid --- */
-  .grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-    padding:0 24px;
-  }
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 24px; }
   .grid-item{
     display:flex;
     align-items:center;
     gap:10px;
-    padding:14px 14px;
-    background:var(--bg-alt);
-    border:1px solid var(--line);
-    border-radius:14px;
+    padding:14px;
     text-decoration:none;
     color:var(--paper);
-    transition:transform .18s cubic-bezier(.22,.9,.3,1), border-color .18s ease, background .18s ease;
-  }
-  .grid-item:hover{
-    transform:translateY(-2px);
-    border-color:var(--blue);
-    background:var(--bg-alt-2);
   }
   .grid-item.full{ grid-column:1 / -1; }
   .grid-icon{
@@ -284,22 +354,95 @@
     border-radius:9px;
     background:#0a0a0a;
     border:1px solid var(--blue-dim);
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    display:flex; align-items:center; justify-content:center;
     color:var(--blue);
   }
-  .grid-label{ font-size:13px; font-weight:600; line-height:1.25; }
-
-  footer{
-    text-align:center;
-    margin-top:40px;
-    font-family:'JetBrains Mono', monospace;
-    font-size:10.5px;
-    color:var(--line);
-    letter-spacing:1px;
-    text-transform:uppercase;
+  .grid-label{ font-size:13px; font-weight:600; line-height:1.25; }/* --- FAQ --- */
+  .faq-wrap{ margin:36px 24px 0; }
+  .faq-list{ display:flex; flex-direction:column; gap:10px; }
+  details.faq-item{ padding:2px 16px; }
+  details.faq-item summary{
+    list-style:none;
+    cursor:pointer;
+    padding:14px 0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    font-size:13.5px;
+    font-weight:600;
   }
+  details.faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-plus{
+    flex-shrink:0;
+    width:22px; height:22px;
+    border-radius:6px;
+    border:1px solid var(--blue-dim);
+    color:var(--blue);
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px;
+    transition:transform .2s ease;
+  }
+  details.faq-item[open] .faq-plus{ transform:rotate(45deg); }
+  .faq-answer{
+    font-size:13px;
+    color:var(--text-soft);
+    line-height:1.6;
+    padding-bottom:16px;
+  }
+
+  /* --- Footer --- */
+  footer{
+    margin:44px 24px 0;
+    padding:24px 20px;
+    text-align:center;
+  }
+  .footer-name{ font-family:'Archivo Black', sans-serif; font-size:15px; text-transform:uppercase; letter-spacing:-.2px; }
+  .footer-location{ font-size:12px; color:var(--muted); margin-top:6px; }
+  .footer-links{
+    display:flex;
+    justify-content:center;
+    gap:16px;
+    margin-top:14px;
+    flex-wrap:wrap;
+  }
+  .footer-links a{
+    font-size:12px;
+    font-weight:600;
+    color:var(--blue);
+    text-decoration:none;
+  }
+  .footer-links a:hover{ text-decoration:underline; }
+  .footer-copy{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    color:var(--muted);
+    margin-top:16px;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+    letter-spacing:.4px;
+  }
+
+  /* --- Back to top --- */
+  .to-top{
+    position:fixed;
+    bottom:20px; right:20px;
+    width:46px; height:46px;
+    border-radius:50%;
+    background:var(--bg-alt);
+    border:1px solid var(--blue-dim);
+    color:var(--blue);
+    display:flex; align-items:center; justify-content:center;
+    text-decoration:none;
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(10px);
+    transition:opacity .25s ease, transform .25s ease, border-color .2s ease;
+    z-index:5;
+    box-shadow:0 8px 20px -6px rgba(0,0,0,.6);
+  }
+  .to-top.show{ opacity:1; pointer-events:auto; transform:translateY(0); }
+  .to-top:hover{ border-color:var(--blue); }
 </style>
 </head>
 <body>
@@ -308,19 +451,13 @@
 
   <div class="banner"></div>
 
-  <div class="header reveal" style="animation-delay:.05s">
+  <div class="header reveal visible">
     <div class="avatar-wrap">
       <div class="avatar-glow"></div>
       <div class="avatar"><img src="500.png" alt="João Santos"></div>
     </div>
 
-    <div class="name-row">
-      <h1>João Santos</h1>
-      <svg class="verified" width="20" height="20" viewBox="0 0 22 22" fill="none">
-        <path d="M11 0L13.4 2.1L16.5 1.4L17.6 4.4L20.6 5.5L19.9 8.6L22 11L19.9 13.4L20.6 16.5L17.6 17.6L16.5 20.6L13.4 19.9L11 22L8.6 19.9L5.5 20.6L4.4 17.6L1.4 16.5L2.1 13.4L0 11L2.1 8.6L1.4 5.5L4.4 4.4L5.5 1.4L8.6 2.1L11 0Z" fill="#3B7EFF"/>
-        <path d="M6.5 11.3L9.3 14L15.5 7.7" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
+    <h1>João Santos</h1>
 
     <div class="role">Sites · Automação · Gestão Digital</div>
     <p class="tagline">Transformando empresas em resultados digitais.</p>
@@ -329,20 +466,20 @@
     <div class="proof">
       <div class="proof-chip">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B7EFF" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-        +20 projetos entregues
-      </div>
-      <div class="proof-chip">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B7EFF" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
         Atendimento em todo o Brasil
       </div>
       <div class="proof-chip">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B7EFF" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-        Sites modernos e personalizados
+        Projetos personalizados
+      </div>
+      <div class="proof-chip">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B7EFF" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Suporte durante o desenvolvimento
       </div>
     </div>
   </div>
 
-  <div class="cta-wrap reveal" style="animation-delay:.15s">
+  <div class="cta-wrap reveal visible">
     <a class="cta" href="https://wa.me/5522992286480" target="_blank" rel="noopener noreferrer">
       <div class="cta-icon"><img src="501.png" alt="WhatsApp"></div>
       <div class="cta-text">
@@ -351,23 +488,167 @@
       </div>
       <div class="cta-arrow">→</div>
     </a>
+
+    <a class="cta-secondary" href="https://wa.me/5522992286480" target="_blank" rel="noopener noreferrer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      Ver Portfólio
+    </a>
   </div>
 
-  <div class="sobre reveal" style="animation-delay:.22s">
-    <div class="sobre-eyebrow">Sobre mim</div>
-    <p>Sou desenvolvedor web freelancer, no Rio de Janeiro, especializado em criar presenças digitais completas — do site institucional ao chatbot que atende seu cliente automaticamente. Trabalho direto com pequenos negócios que querem parecer (e vender) mais profissional online.</p>
+  <div class="sobre panel reveal">
+    <div class="sec-title">
+      <div class="ic">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <h2>Sobre mim</h2>
+    </div>
+    <p>Sou desenvolvedor web freelancer, no Rio de Janeiro, especializado em criar presenças digitais completas — do site institucional ao chatbot que atende seu cliente automaticamente.</p>
+    <p>Trabalho direto com pequenos negócios que querem parecer, e vender, mais profissional online — sem burocracia e com acompanhamento próximo em cada etapa.</p>
   </div>
 
-  <div class="divider reveal" style="animation-delay:.28s"><span>Meus serviços</span></div>
+  <div class="steps-wrap reveal">
+    <div class="sec-title" style="padding:0 4px;">
+      <div class="ic">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <h2>Como funciona</h2>
+    </div>
+    <div class="steps">
+      <div class="step panel">
+        <div class="step-num">01</div>
+        <div>
+          <div class="step-title">Você entra em contato</div>
+          <div class="step-sub">Chama no WhatsApp e conta o que precisa</div>
+        </div>
+      </div>
+      <div class="step panel">
+        <div class="step-num">02</div>
+        <div>
+          <div class="step-title">Conversamos sobre o projeto</div>
+          <div class="step-sub">Alinhamos escopo, prazo e valor</div>
+        </div>
+      </div>
+      <div class="step panel">
+        <div class="step-num">03</div>
+        <div>
+          <div class="step-title">Desenvolvimento</div>
+          <div class="step-sub">Construo e te mantenho atualizado</div>
+        </div>
+      </div>
+      <div class="step panel">
+        <div class="step-num">04</div>
+        <div>
+          <div class="step-title">Entrega</div>
+          <div class="step-sub">Site no ar, revisado e pronto pra vender</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="testi-wrap reveal">
+    <div class="sec-title" style="padding:0 4px;">
+      <div class="ic">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17.75l-6.16 3.24 1.18-6.88L2 9.24l6.92-1L12 2l3.08 6.24 6.92 1-5.02 4.87 1.18 6.88z"/></svg>
+      </div>
+      <h2>Depoimentos</h2>
+    </div>
+
+    <div class="testi panel">
+      <div class="testi-quote">
+        <svg width="20" height="16" viewBox="0 0 24 20" fill="currentColor"><path d="M0 20V11.5C0 5.1 4.2.6 10 0v3.6C6.4 4.4 4 7 4 11h6v9H0zm14 0V11.5C14 5.1 18.2.6 24 0v3.6c-3.6.8-6 3.4-6 7.4h6v9H14z"/></svg>
+      </div>
+      <p>"O João entendeu exatamente o que minha empresa precisava. O site ficou profissional e o WhatsApp integrado facilitou muito o atendimento aos clientes."</p>
+      <div class="testi-author">
+        <div class="testi-avatar">MT</div>
+        <div>
+          <div class="testi-name">Mello's Transportes</div>
+          <div class="testi-role">Mudanças · Rio de Janeiro</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testi panel">
+      <div class="testi-quote">
+        <svg width="20" height="16" viewBox="0 0 24 20" fill="currentColor"><path d="M0 20V11.5C0 5.1 4.2.6 10 0v3.6C6.4 4.4 4 7 4 11h6v9H0zm14 0V11.5C14 5.1 18.2.6 24 0v3.6c-3.6.8-6 3.4-6 7.4h6v9H14z"/></svg>
+      </div>
+      <p>"Atendimento rápido do início ao fim. Entregou o projeto no prazo combinado e ainda deu dicas de como melhorar minha presença online."</p>
+      <div class="testi-author">
+        <div class="testi-avatar">RS</div>
+        <div>
+          <div class="testi-name">RSantosLog</div>
+          <div class="testi-role">Transportes</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testi panel">
+      <div class="testi-quote">
+        <svg width="20" height="16" viewBox="0 0 24 20" fill="currentColor"><path d="M0 20V11.5C0 5.1 4.2.6 10 0v3.6C6.4 4.4 4 7 4 11h6v9H0zm14 0V11.5C14 5.1 18.2.6 24 0v3.6c-3.6.8-6 3.4-6 7.4h6v9H14z"/></svg>
+      </div>
+      <p>"Meu cardápio digital ficou lindo e muito fácil de usar. Meus clientes elogiam toda hora. Recomendo demais o trabalho dele."</p>
+      <div class="testi-author">
+        <div class="testi-avatar">PN</div>
+        <div>
+          <div class="testi-name">Pizzas D'Nana</div>
+          <div class="testi-role">Cardápio Digital</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider reveal"><span>Meus serviços</span></div>
 
   <div class="grid" id="grid"></div>
 
-  <footer class="reveal" style="animation-delay:.4s">Rio de Janeiro · Brasil</footer>
+  <div class="faq-wrap reveal">
+    <div class="sec-title" style="padding:0 4px;">
+      <div class="ic">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h2>Perguntas Frequentes</h2>
+    </div>
+
+    <div class="faq-list">
+      <details class="faq-item panel">
+        <summary>Quanto custa um site?<span class="faq-plus">+</span></summary>
+        <div class="faq-answer">Cada projeto é orçado de acordo com o que você precisa — número de páginas, funcionalidades e prazo. Me chama no WhatsApp e te passo um valor personalizado sem compromisso.</div>
+      </details>
+      <details class="faq-item panel">
+        <summary>Quanto tempo leva pra ficar pronto?<span class="faq-plus">+</span></summary>
+        <div class="faq-answer">Depende da complexidade, mas a maioria dos projetos fica pronta em poucos dias após alinharmos o escopo. Te mantenho atualizado durante todo o processo.</div>
+      </details>
+      <details class="faq-item panel">
+        <summary>Preciso já ter domínio e hospedagem?<span class="faq-plus">+</span></summary>
+        <div class="faq-answer">Não. Posso te orientar do zero — desde escolher o nome do domínio até deixar o site publicado e no ar.</div>
+      </details>
+      <details class="faq-item panel">
+        <summary>Você faz manutenção depois de pronto?<span class="faq-plus">+</span></summary>
+        <div class="faq-answer">Sim, ofereço suporte pra ajustes e atualizações após a entrega. A gente combina os detalhes conforme a necessidade do seu negócio.</div>
+      </details>
+      <details class="faq-item panel">
+        <summary>Como funciona o pagamento?<span class="faq-plus">+</span></summary>
+        <div class="faq-answer">Geralmente dividido em etapas: um sinal pra iniciar o projeto e o restante na entrega. Conversamos sobre isso já no primeiro contato.</div>
+      </details>
+    </div>
+  </div>
+
+  <footer class="reveal">
+    <div class="footer-name">João Santos</div>
+    <div class="footer-location">Rio de Janeiro · Brasil</div>
+    <div class="footer-links">
+      <a href="https://wa.me/5522992286480" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <a href="mailto:contato@joaosantos.com">E-mail</a>
+    </div>
+    <div class="footer-copy">© 2026 João Santos. Todos os direitos reservados.</div>
+  </footer>
 </div>
+
+<a href="#top" class="to-top" id="toTop" aria-label="Voltar ao topo">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+</a>
 
 <script>
   // ======= EDITE AQUI OS SERVIÇOS/LINKS =======
-  // troque "url" pelo link real de cada serviço quando estiver pronto
   const services = [
     {
       label: "Portfólio",
@@ -409,15 +690,33 @@
   // ==============================================
 
   const grid = document.getElementById('grid');
-  services.forEach((s, i) => {
+  services.forEach((s) => {
     const a = document.createElement('a');
     a.href = s.url;
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
-    a.className = 'grid-item reveal' + (s.full ? ' full' : '');
-    a.style.animationDelay = (0.3 + i * 0.05) + 's';
+    a.className = 'grid-item panel' + (s.full ? ' full' : '');
     a.innerHTML = `<div class="grid-icon">${s.icon}</div><div class="grid-label">${s.label}</div>`;
     grid.appendChild(a);
+  });
+
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  revealEls.forEach(el => io.observe(el));
+
+  // Back to top
+  const toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 500) toTop.classList.add('show');
+    else toTop.classList.remove('show');
   });
 </script>
 
