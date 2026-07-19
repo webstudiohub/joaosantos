@@ -3,722 +3,2208 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>João Santos — Links</title>
-<meta property="og:title" content="João Santos — Sites, Automação & Gestão Digital">
-<meta property="og:description" content="Solicite seu orçamento direto no WhatsApp.">
+<title>Gerna Bikes — Manifesto de Transporte</title>
+<link rel="icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<!-- PWA: torna o app instalável na tela inicial -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gerna">
+<!-- Supabase (banco de dados + login) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- QR Code (gerado localmente, sem depender de serviço externo) -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<!-- Gráficos dos relatórios -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0a0a0a;
-    --bg-alt:#141414;
-    --bg-alt-2:#191919;
-    --paper:#f2f0ea;
-    --text-soft:#d4d2cb;
-    --blue:#3B7EFF;
-    --blue-dim:#1a3a7a;
-    --line:#232323;
-    --muted:#8a8a86;
-    --radius:16px;
+    --paper:#FAFAF9;
+    --paper-2:#F0EFEA;
+    --ink:#111110;
+    --ink-soft:#6B6863;
+    --safety:#E8AC1F;
+    --safety-dark:#B8850F;
+    --line:#E4E1D8;
+    --transit:#0A0A0A;
+    --transit-2:#161615;
+    --transit-line:#2A2A28;
+    --paper-on-transit:#F5F4F0;
+    --ok:#2E8B57;
+    --radius-lg:20px;
+    --radius-md:16px;
+    --shadow-soft:0 8px 24px -8px rgba(0,0,0,.12);
+    --shadow-soft-dark:0 8px 28px -8px rgba(0,0,0,.5);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{ scroll-behavior:smooth; }
   body{
-    background:var(--bg);
-    color:var(--paper);
     font-family:'Inter', sans-serif;
+    background:var(--paper);
+    color:var(--ink);
     min-height:100vh;
-    display:flex;
-    justify-content:center;
-    padding-bottom:60px;
-    position:relative;
-    overflow-x:hidden;
   }
-  body::before{
-    content:'';
-    position:fixed;
-    inset:0;
-    background-image:radial-gradient(circle at 50% 0%, rgba(59,126,255,0.08), transparent 50%);
-    pointer-events:none;
-    z-index:0;
-  }
-  .card{
-    width:100%;
-    max-width:420px;
-    position:relative;
-    z-index:1;
-  }
-
-  /* --- Scroll reveal --- */
-  .reveal{
-    opacity:0;
-    transform:translateY(18px);
-    transition:opacity .6s cubic-bezier(.22,.9,.3,1), transform .6s cubic-bezier(.22,.9,.3,1);
-  }
-  .reveal.visible{ opacity:1; transform:translateY(0); }
-  @media (prefers-reduced-motion: reduce){
-    .reveal{ opacity:1; transform:none; transition:none; }
-  }
-
-  /* --- Shared panel style (identidade visual única) --- */
-  .panel{
-    background:var(--bg-alt);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    transition:transform .2s cubic-bezier(.22,.9,.3,1), border-color .2s ease, box-shadow .2s ease, background .2s ease;
-  }
-  .panel:hover{
-    transform:translateY(-2px);
-    border-color:var(--blue);
-    box-shadow:0 10px 26px -10px rgba(59,126,255,.32);
-  }
-
-  /* --- Banner --- */
-  .banner{
-    width:100%;
-    height:190px;
-    background:
-      linear-gradient(180deg, rgba(10,10,10,0) 35%, var(--bg) 100%),
-      url('banner.png') center/cover no-repeat,
-      linear-gradient(135deg, #1a1a1a, #0a0a0a);
-    position:relative;
-  }
-
-  /* --- Header --- */
-  .header{ padding:0 24px; text-align:center; margin-top:-54px; }
-  .avatar-wrap{
-    position:relative;
-    width:112px;
-    height:112px;
-    margin:0 auto 18px;
-  }
-  .avatar-glow{
-    position:absolute;
-    inset:-4px;
-    border-radius:50%;
-    background:var(--blue);
-    filter:blur(10px);
-    opacity:0.35;
-  }
-  .avatar{
-    position:relative;
-    width:100%;
-    height:100%;
-    border-radius:50%;
-    background:linear-gradient(145deg, #1e1e1e, #0a0a0a);
-    border:4px solid var(--bg);
-    outline:1px solid var(--blue-dim);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-family:'Archivo Black', sans-serif;
-    font-size:28px;
-    color:var(--blue);
-    overflow:hidden;
-  }
-  .avatar img{width:100%;height:100%;object-fit:cover; display:block;}
-
-  h1{
-    font-family:'Archivo Black', sans-serif;
-    font-size:27px;
-    letter-spacing:-0.5px;
-    text-transform:uppercase;
-  }
-  .role{
-    font-family:'JetBrains Mono', monospace;
-    font-size:12px;
-    color:var(--blue);
-    text-transform:uppercase;
-    letter-spacing:1.5px;
-    margin-top:7px;
-  }
-  .tagline{
-    font-size:16.5px;
-    font-weight:700;
-    color:var(--paper);
-    margin:14px auto 0;
-    max-width:290px;
-    line-height:1.4;
-  }
-  .bio{
-    color:var(--text-soft);
-    font-size:14.5px;
-    font-weight:400;
-    line-height:1.6;
-    margin:12px auto 0;
-    max-width:310px;
-  }
-
-  /* --- Social proof --- */
-  .proof{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:8px;
-    margin:32px auto 0;
-    max-width:340px;
-  }
-  .proof-chip{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    padding:7px 12px;
-    background:var(--bg-alt);
-    border:1px solid var(--line);
-    border-radius:20px;
-    font-size:11.5px;
+  .eyebrow{
+    font-family:'Oswald', sans-serif;
     font-weight:600;
-    color:var(--text-soft);
-  }
-  .proof-chip svg{ flex-shrink:0; }
-
-  /* --- CTAs --- */
-  .cta-wrap{ padding:28px 24px 0; display:flex; flex-direction:column; gap:12px; }
-
-  @keyframes ctaPulse{
-    0%{ box-shadow:0 0 0 0 rgba(59,126,255,.45); }
-    70%{ box-shadow:0 0 0 14px rgba(59,126,255,0); }
-    100%{ box-shadow:0 0 0 0 rgba(59,126,255,0); }
-  }
-  .cta{
-    position:relative;
-    display:flex;
-    align-items:center;
-    gap:16px;
-    padding:18px 20px;
-    background:linear-gradient(155deg, #16274d, #101010 65%);
-    border:1px solid var(--blue-dim);
-    border-radius:var(--radius);
-    text-decoration:none;
-    color:var(--paper);
-    transition:transform .22s cubic-bezier(.22,.9,.3,1), border-color .22s ease, box-shadow .22s ease;
-    animation:ctaPulse 2.8s infinite;
-  }
-  .cta:hover{
-    transform:translateY(-3px);
-    border-color:var(--blue);
-    box-shadow:0 12px 32px -8px rgba(59,126,255,.4);
-    animation-play-state:paused;
-  }
-  .cta:active{ transform:translateY(-1px); }
-
-  .cta-icon{
-    flex-shrink:0;
-    width:50px; height:50px;
-    border-radius:13px;
-    background:#0a0a0a;
-    border:1px solid var(--line);
-    overflow:hidden;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .cta-icon img{ width:100%; height:100%; object-fit:cover; }
-  .cta-text{ flex:1; }
-  .cta-title{ font-weight:800; font-size:17.5px; letter-spacing:-.2px; }
-  .cta-sub{ font-family:'Inter', sans-serif; font-weight:500; font-size:13px; color:var(--text-soft); margin-top:4px; line-height:1.35; }
-  .cta-arrow{ color:var(--blue); font-size:20px; transition:transform .22s cubic-bezier(.22,.9,.3,1); }
-  .cta:hover .cta-arrow{ transform:translateX(4px); }
-
-  .cta-secondary{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    padding:15px 20px;
-    background:transparent;
-    border:1px solid var(--blue-dim);
-    border-radius:var(--radius);
-    text-decoration:none;
-    color:var(--blue);
-    font-weight:700;
-    font-size:14.5px;
-    transition:transform .2s cubic-bezier(.22,.9,.3,1), border-color .2s ease, background .2s ease;
-  }
-  .cta-secondary:hover{
-    transform:translateY(-2px);
-    border-color:var(--blue);
-    background:rgba(59,126,255,.08);
-  }
-
-  /* --- Section title with icon --- */
-  .sec-title{
-    display:flex;
-    align-items:center;
-    gap:9px;
-    margin-bottom:12px;
-  }
-  .sec-title .ic{
-    width:28px; height:28px;
-    border-radius:8px;
-    background:#0a0a0a;
-    border:1px solid var(--blue-dim);
-    color:var(--blue);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-shrink:0;
-  }
-  .sec-title h2{
-    font-size:14px;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.8px;
-  }
-
-  /* --- Sobre --- */
-  .sobre{ margin:36px 24px 0; padding:20px; }
-  .sobre p{
-    font-size:13.5px;
-    color:var(--text-soft);
-    line-height:1.7;
-  }
-  .sobre p + p{ margin-top:10px; }
-
-  /* --- Como funciona --- */
-  .steps-wrap{ margin:36px 24px 0; }
-  .steps{ display:flex; flex-direction:column; gap:10px; }
-  .step{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    padding:14px 16px;
-  }
-  .step-num{
-    flex-shrink:0;
-    width:34px; height:34px;
-    border-radius:10px;
-    background:#0a0a0a;
-    border:1px solid var(--blue-dim);
-    color:var(--blue);
-    font-family:'JetBrains Mono', monospace;
-    font-weight:700;
-    font-size:13px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .step-title{ font-weight:600; font-size:13.5px; }
-  .step-sub{ font-size:12px; color:var(--muted); margin-top:2px; }
-
-  /* --- Depoimentos --- */
-  .testi-wrap{ margin:36px 24px 0; }
-  .testi{
-    padding:18px;
-    margin-bottom:12px;
-  }
-  .testi:last-child{ margin-bottom:0; }
-  .testi-quote{ color:var(--blue); opacity:.5; margin-bottom:6px; }
-  .testi p{ font-size:13.5px; color:var(--text-soft); line-height:1.6; font-style:italic; }
-  .testi-author{ display:flex; align-items:center; gap:8px; margin-top:12px; }
-  .testi-avatar{
-    width:30px; height:30px;
-    border-radius:50%;
-    background:linear-gradient(145deg,#1e1e1e,#0a0a0a);
-    border:1px solid var(--blue-dim);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Archivo Black', sans-serif;
-    font-size:11px;
-    color:var(--blue);
-    flex-shrink:0;
-  }
-  .testi-name{ font-size:12.5px; font-weight:700; }
-  .testi-role{ font-size:11px; color:var(--muted); }
-
-  /* --- Divider --- */
-  .divider{ display:flex; align-items:center; gap:10px; margin:36px 24px 16px; }
-  .divider span{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    color:var(--muted);
     text-transform:uppercase;
     letter-spacing:2px;
-    white-space:nowrap;
+    font-size:11.5px;
   }
-  .divider::before, .divider::after{ content:''; height:1px; flex:1; background:var(--line); }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  .screen{ display:none; min-height:100vh; }
+  .screen.active{ display:block; animation:fade .4s cubic-bezier(.16,1,.3,1); }
+  @keyframes fade{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
 
-  /* --- Service grid --- */
-  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 24px; }
-  .grid-item{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:14px;
-    text-decoration:none;
-    color:var(--paper);
+  /* ============ TOPBAR ============ */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px;
+    border-bottom:2px solid var(--ink);
+    background:var(--paper);
+    position:sticky; top:0; z-index:10;
   }
-  .grid-item.full{ grid-column:1 / -1; }
-  .grid-icon{
-    flex-shrink:0;
-    width:34px; height:34px;
+  .topbar.dark{ background:var(--transit); border-bottom-color:var(--transit-line); }
+  .brand{ display:flex; align-items:center; gap:11px; }
+  .brand-mark{
+    width:36px; height:36px;
     border-radius:9px;
-    background:#0a0a0a;
-    border:1px solid var(--blue-dim);
-    display:flex; align-items:center; justify-content:center;
-    color:var(--blue);
-  }
-  .grid-label{ font-size:13px; font-weight:600; line-height:1.25; }/* --- FAQ --- */
-  .faq-wrap{ margin:36px 24px 0; }
-  .faq-list{ display:flex; flex-direction:column; gap:10px; }
-  details.faq-item{ padding:2px 16px; }
-  details.faq-item summary{
-    list-style:none;
-    cursor:pointer;
-    padding:14px 0;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    font-size:13.5px;
-    font-weight:600;
-  }
-  details.faq-item summary::-webkit-details-marker{ display:none; }
-  .faq-plus{
+    overflow:hidden;
     flex-shrink:0;
-    width:22px; height:22px;
-    border-radius:6px;
-    border:1px solid var(--blue-dim);
-    color:var(--blue);
-    display:flex; align-items:center; justify-content:center;
-    font-size:15px;
-    transition:transform .2s ease;
+    box-shadow:0 4px 12px -4px rgba(11,20,98,.5);
   }
-  details.faq-item[open] .faq-plus{ transform:rotate(45deg); }
-  .faq-answer{
-    font-size:13px;
-    color:var(--text-soft);
-    line-height:1.6;
-    padding-bottom:16px;
+  .brand-mark img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .brand-name{ font-family:'Oswald'; font-weight:700; font-size:17px; letter-spacing:.5px; text-transform:uppercase; }
+  .brand-name small{ display:block; font-family:'JetBrains Mono'; font-weight:500; font-size:9px; letter-spacing:1.5px; color:var(--ink-soft); text-transform:uppercase; margin-top:1px; }
+  .topbar.dark .brand-name small{ color:#9FB6C1; }
+  .topbar.dark .brand-name{ color:var(--paper-on-transit); }
+  .back-btn{
+    font-family:'Oswald'; font-size:12px; text-transform:uppercase; letter-spacing:1px;
+    background:none; border:1.5px solid var(--ink); color:var(--ink);
+    padding:8px 14px; cursor:pointer; border-radius:8px;
+    transition:transform .15s ease, opacity .15s ease;
   }
+  .back-btn:active{ transform:scale(.95); opacity:.7; }
+  .topbar.dark .back-btn{ border-color:var(--paper-on-transit); color:var(--paper-on-transit); }
 
-  /* --- Footer --- */
-  footer{
-    margin:44px 24px 0;
-    padding:24px 20px;
-    text-align:center;
+  /* ============ HOME ============ */
+  .home-wrap{ max-width:520px; margin:0 auto; padding:8px 22px 60px; }
+  .home-title{
+    font-family:'Oswald'; font-weight:700; font-size:34px;
+    text-transform:uppercase; line-height:1.05; letter-spacing:.5px;
   }
-  .footer-name{ font-family:'Archivo Black', sans-serif; font-size:15px; text-transform:uppercase; letter-spacing:-.2px; }
-  .footer-location{ font-size:12px; color:var(--muted); margin-top:6px; }
-  .footer-links{
-    display:flex;
-    justify-content:center;
-    gap:16px;
-    margin-top:14px;
-    flex-wrap:wrap;
+  .home-sub{ color:var(--ink-soft); font-size:14.5px; margin-top:12px; line-height:1.6; max-width:400px; }
+  .home-tiles{ display:flex; flex-direction:column; gap:16px; margin-top:36px; }
+  .tile{
+    position:relative;
+    border:2px solid var(--ink);
+    padding:22px 20px;
+    background:var(--paper);
+    cursor:pointer;
+    text-align:left;
+    box-shadow:3px 3px 0 rgba(23,21,18,.12);
+    transition:transform .18s cubic-bezier(.22,.9,.3,1), box-shadow .18s cubic-bezier(.22,.9,.3,1);
   }
-  .footer-links a{
-    font-size:12px;
-    font-weight:600;
-    color:var(--blue);
-    text-decoration:none;
+  .tile:hover{ transform:translate(-3px,-3px); box-shadow:6px 6px 0 var(--ink); }
+  .tile:active{ transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink); }
+  .tile-tag{
+    font-family:'JetBrains Mono'; font-size:10.5px; color:var(--safety-dark);
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:block;
   }
-  .footer-links a:hover{ text-decoration:underline; }
-  .footer-copy{
-    font-family:'JetBrains Mono', monospace;
-    font-size:10px;
-    color:var(--muted);
-    margin-top:16px;
-    padding-top:14px;
-    border-top:1px solid var(--line);
-    letter-spacing:.4px;
-  }
+  .tile-title{ font-family:'Oswald'; font-weight:700; font-size:20px; text-transform:uppercase; }
+  .tile-desc{ font-size:13px; color:var(--ink-soft); margin-top:6px; line-height:1.5; }
+  .tile.transit{ background:var(--transit); border-color:var(--transit); color:var(--paper-on-transit); }
+  .tile.transit:hover{ box-shadow:5px 5px 0 var(--safety); }
+  .tile.transit .tile-tag{ color:var(--safety); }
+  .tile.transit .tile-desc{ color:#9FB6C1; }
 
-  /* --- Back to top --- */
-  .to-top{
-    position:fixed;
-    bottom:20px; right:20px;
-    width:46px; height:46px;
-    border-radius:50%;
-    background:var(--bg-alt);
-    border:1px solid var(--blue-dim);
-    color:var(--blue);
+  /* ============ HERO ILLUSTRATION ============ */
+  .hero-visual{
+    position:relative;
+    height:140px;
+    overflow:hidden;
+    background:
+      repeating-linear-gradient(90deg, transparent, transparent 38px, var(--line) 38px, var(--line) 39px);
+  }
+  .hero-visual::before{
+    content:'';
+    position:absolute; left:0; right:0; bottom:32px;
+    height:1.5px;
+    background:repeating-linear-gradient(90deg, var(--ink) 0 10px, transparent 10px 18px);
+    opacity:.35;
+  }
+  .hero-track{
+    position:absolute; bottom:16px; left:0;
+    display:flex; align-items:flex-end;
+    animation:ride 16s linear infinite;
+    width:max-content;
+  }
+  .hero-track svg{ width:100px; height:auto; margin-right:70px; flex-shrink:0; }
+  @keyframes ride{
+    from{ transform:translateX(0); }
+    to{ transform:translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce){ .hero-track{ animation:none; } }
+
+  /* ============ LOGIN ============ */
+  .login-wrap{
+    min-height:100vh;
     display:flex; align-items:center; justify-content:center;
-    text-decoration:none;
-    opacity:0;
+    padding:24px;
+    background:var(--transit);
+  }
+  .login-card{
+    width:100%; max-width:380px;
+    background:var(--transit-2);
+    border:1px solid var(--transit-line);
+    border-radius:var(--radius-lg);
+    padding:36px 28px;
+    box-shadow:var(--shadow-soft-dark);
+  }
+  .login-brand{ display:flex; align-items:center; gap:11px; margin-bottom:28px; }
+  .login-brand .brand-mark{ animation:splashIn .55s cubic-bezier(.16,1,.3,1); }
+  .login-brand .brand-name{ color:var(--paper-on-transit); }
+  .login-title{ font-family:'Oswald'; font-weight:700; font-size:22px; color:var(--paper-on-transit); text-transform:uppercase; margin-bottom:6px; }
+  .login-sub{ font-size:13px; color:#9FB6C1; margin-bottom:24px; line-height:1.5; }
+  .login-field{ margin-bottom:16px; }
+  .login-field label{ display:block; font-size:12px; font-weight:600; color:var(--paper-on-transit); margin-bottom:6px; }
+  .login-field input{
+    width:100%; padding:14px 15px;
+    background:var(--transit); border:1.5px solid var(--transit-line);
+    border-radius:var(--radius-md);
+    color:var(--paper-on-transit); font-family:'Inter'; font-size:14.5px;
+    outline:none;
+    transition:border-color .2s ease;
+  }
+  .login-field input:focus{ border-color:var(--safety); }
+  .login-btn{
+    width:100%; margin-top:10px;
+    background:var(--safety); color:#0a0a0a;
+    border:none; padding:16px;
+    border-radius:var(--radius-md);
+    font-family:'Oswald'; font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:1px;
+    cursor:pointer;
+    box-shadow:0 10px 24px -8px rgba(232,172,31,.4);
+    transition:transform .15s ease;
+  }
+  .login-btn:hover{ transform:translateY(-1px); }
+  .login-btn:disabled{ opacity:.6; }
+  .login-error{ color:#ff8a6a; font-size:12.5px; margin-top:12px; display:none; font-weight:600; }
+  /* ============ TOAST / SNACKBAR ============ */
+  .toast-wrap{
+    position:fixed; left:16px; right:16px; bottom:110px; z-index:999;
+    display:flex; flex-direction:column; gap:8px; align-items:center;
     pointer-events:none;
-    transform:translateY(10px);
-    transition:opacity .25s ease, transform .25s ease, border-color .2s ease;
-    z-index:5;
-    box-shadow:0 8px 20px -6px rgba(0,0,0,.6);
   }
-  .to-top.show{ opacity:1; pointer-events:auto; transform:translateY(0); }
-  .to-top:hover{ border-color:var(--blue); }
+  .toast{
+    max-width:420px; width:100%;
+    display:flex; align-items:center; gap:10px;
+    background:var(--transit-2); border:1px solid var(--transit-line);
+    color:var(--paper-on-transit);
+    padding:14px 16px; border-radius:14px;
+    box-shadow:0 14px 32px -8px rgba(0,0,0,.55);
+    font-size:13.5px; font-weight:600;
+    animation:toastIn .35s cubic-bezier(.16,1,.3,1);
+  }
+  .toast.hide{ animation:toastOut .3s ease forwards; }
+  .toast .toast-icon{
+    width:22px; height:22px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(232,172,31,.15); color:var(--safety);
+  }
+  .toast.error .toast-icon{ background:rgba(245,98,98,.15); color:#F56262; }
+  .toast .toast-icon svg{ width:13px; height:13px; }
+  @keyframes toastIn{ from{ opacity:0; transform:translateY(14px) scale(.95); } to{ opacity:1; transform:translateY(0) scale(1); } }
+  @keyframes toastOut{ from{ opacity:1; transform:translateY(0); } to{ opacity:0; transform:translateY(10px); } }
+
+  /* ============ SKELETON LOADING ============ */
+  .skel{
+    background:linear-gradient(100deg, var(--transit-2) 30%, #232320 50%, var(--transit-2) 70%);
+    background-size:200% 100%;
+    animation:skelShimmer 1.3s ease-in-out infinite;
+    border-radius:10px;
+  }
+  @keyframes skelShimmer{ from{ background-position:120% 0; } to{ background-position:-20% 0; } }
+  .skel-card{
+    background:var(--transit-2); border:1px solid var(--transit-line);
+    border-radius:var(--radius-md); padding:17px 16px; margin-bottom:14px;
+    box-shadow:var(--shadow-soft-dark);
+    display:flex; align-items:center; gap:14px;
+  }
+  .skel-avatar{ width:44px; height:44px; border-radius:12px; flex-shrink:0; }
+  .skel-lines{ flex:1; display:flex; flex-direction:column; gap:8px; }
+  .skel-line{ height:12px; border-radius:6px; }
+  .skel-line.w60{ width:60%; }
+  .skel-line.w40{ width:40%; }
+  .skel-stat{ border-radius:var(--radius-md); height:118px; }
+
+  /* ============ ENTRADA ESCALONADA DE CARDS ============ */
+  @keyframes cardIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+  .stagger-in{ animation:cardIn .4s cubic-bezier(.16,1,.3,1) both; }
+
+  /* ============ LIGHTBOX DE FOTOS ============ */
+  .lightbox{
+    display:none; position:fixed; inset:0; z-index:998;
+    background:rgba(5,5,5,.96);
+    align-items:center; justify-content:center;
+    flex-direction:column;
+  }
+  .lightbox.show{ display:flex; animation:fade .25s ease; }
+  .lightbox-close{
+    position:absolute; top:18px; right:18px; width:38px; height:38px;
+    border-radius:50%; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+    color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2;
+  }
+  .lightbox-stage{
+    width:100%; height:78%; display:flex; align-items:center; justify-content:center;
+    overflow:hidden; touch-action:pan-y pinch-zoom; position:relative;
+  }
+  .lightbox-stage img{
+    max-width:92%; max-height:92%; object-fit:contain;
+    transition:transform .25s ease;
+    touch-action:pinch-zoom;
+  }
+  .lightbox-caption{ color:#9FB6C1; font-size:12.5px; margin-top:14px; font-family:'JetBrains Mono'; }
+  .lightbox-dots{ display:flex; gap:6px; margin-top:16px; }
+  .lightbox-dot{ width:6px; height:6px; border-radius:50%; background:#3a4a52; transition:background .2s ease, transform .2s ease; }
+  .lightbox-dot.active{ background:var(--safety); transform:scale(1.3); }
+  .lightbox-arrow{
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+    color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2;
+  }
+  .lightbox-arrow.prev{ left:14px; } .lightbox-arrow.next{ right:14px; }
+  .gallery-card{ cursor:pointer; }
+
+  .splash-screen{
+    display:none; position:fixed; inset:0; z-index:999;
+    background:radial-gradient(120% 100% at 50% 30%, var(--transit-2), var(--transit));
+    flex-direction:column; align-items:center; justify-content:center;
+  }
+  .splash-screen.show{ display:flex; }
+  .splash-screen.hide{ animation:splashOut .4s ease forwards; }
+  @keyframes splashOut{ to{ opacity:0; } }
+  .splash-logo{
+    width:100px; height:100px; border-radius:26px; overflow:hidden;
+    box-shadow:0 20px 46px -12px rgba(11,20,98,.65);
+    animation:splashIn .65s cubic-bezier(.16,1,.3,1);
+  }
+  .splash-logo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  @keyframes splashIn{ from{ opacity:0; transform:scale(.72); } to{ opacity:1; transform:scale(1); } }
+  .splash-name{
+    font-family:'Oswald'; font-weight:700; font-size:19px; letter-spacing:1.8px;
+    text-transform:uppercase; color:var(--paper-on-transit); margin-top:22px;
+    animation:fade .5s ease .15s both;
+  }
+  .splash-tagline{
+    font-family:'JetBrains Mono'; font-size:11px; color:#7691a0; margin-top:7px;
+    letter-spacing:.5px; animation:fade .5s ease .3s both;
+  }
+
+  /* ============ APP HEADER (dashboard: logo, saudação, data) ============ */
+  .app-header{
+    padding:20px 20px 24px;
+    background:linear-gradient(160deg, var(--transit-2), var(--transit));
+    border-bottom:1px solid var(--transit-line);
+  }
+  .app-header-top{ display:flex; align-items:center; justify-content:space-between; }
+  .app-header-brand{ display:flex; align-items:center; gap:12px; }
+  .brand-mark.lg{
+    width:48px; height:48px; border-radius:14px;
+    box-shadow:0 8px 18px -6px rgba(11,20,98,.6);
+  }
+  .app-header-name{ font-family:'Oswald'; font-weight:700; font-size:15px; letter-spacing:.5px; text-transform:uppercase; color:var(--paper-on-transit); }
+  .app-header-date{ font-family:'JetBrains Mono'; font-size:10.5px; color:#7691a0; margin-top:2px; }
+  .app-header-greeting{ font-family:'Oswald'; font-size:23px; font-weight:600; color:var(--paper-on-transit); margin-top:20px; letter-spacing:.2px; }
+  .app-header-greeting b{ color:var(--safety); }
+  .logout-btn{
+    background:none; border:1px solid var(--transit-line); color:#9FB6C1;
+    font-size:11px; padding:8px 14px; cursor:pointer; font-family:'JetBrains Mono';
+    border-radius:8px; transition:border-color .2s ease, color .2s ease, transform .15s ease;
+  }
+  .logout-btn:hover{ border-color:var(--safety); color:var(--safety); }
+  .logout-btn:active{ transform:scale(.95); }
+
+  .page-title{ font-family:'Oswald'; font-weight:700; font-size:24px; text-transform:uppercase; letter-spacing:.3px; color:var(--paper-on-transit); margin-top:6px; }
+
+  /* ============ DASHBOARD ============ */
+  .dash-wrap{ max-width:520px; margin:0 auto; padding:26px 20px 64px; }
+  .dash-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:24px; }
+  .dash-stat{
+    background:var(--transit-2); border:1px solid var(--transit-line);
+    padding:20px 18px; border-radius:var(--radius-md);
+    box-shadow:var(--shadow-soft-dark);
+    transition:transform .18s cubic-bezier(.22,.9,.3,1), border-color .2s ease;
+  }
+  .dash-stat:active{ transform:scale(.96); }
+  .dash-stat-icon{
+    width:34px; height:34px; border-radius:10px;
+    background:rgba(232,172,31,.12); color:var(--safety);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:14px;
+  }
+  .dash-stat-icon svg{ width:18px; height:18px; }
+  .dash-stat-num{ font-family:'Oswald'; font-size:36px; font-weight:700; color:var(--safety); line-height:1; letter-spacing:.2px; }
+  .dash-stat-label{ font-size:11.5px; color:#9FB6C1; margin-top:8px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
+  .search-field{ position:relative; margin-top:24px; }
+  .search-field svg{
+    position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    width:17px; height:17px; color:#7691a0; pointer-events:none;
+  }
+  .dash-search{
+    width:100%; padding:15px 16px 15px 46px; margin-top:0;
+    background:var(--transit-2); border:1.5px solid var(--transit-line);
+    border-radius:var(--radius-md);
+    color:var(--paper-on-transit); font-family:'Inter'; font-size:14px; outline:none;
+    box-shadow:var(--shadow-soft-dark);
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .dash-search:focus{ border-color:var(--safety); box-shadow:0 0 0 3px rgba(232,172,31,.14); }
+  .dash-actions{ display:flex; flex-direction:column; gap:14px; margin-top:32px; }
+  .dash-action{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 19px; background:var(--transit-2); border:1px solid var(--transit-line);
+    border-radius:var(--radius-md);
+    color:var(--paper-on-transit); text-decoration:none; cursor:pointer; font-weight:600; font-size:14px;
+    transition:border-color .2s ease, transform .18s cubic-bezier(.22,.9,.3,1);
+  }
+  .dash-action:hover{ border-color:var(--safety); transform:translateY(-1px); }
+  .dash-action:active{ transform:scale(.98); }
+
+  /* ============ PRÓXIMOS EVENTOS (dashboard) ============ */
+  .dash-section-head{ margin-top:32px; margin-bottom:14px; }
+  .dash-events-list{ display:flex; flex-direction:column; gap:10px; }
+  .dash-event-card{
+    display:flex; align-items:center; gap:14px;
+    padding:14px 16px; background:var(--transit-2); border:1px solid var(--transit-line);
+    border-radius:var(--radius-md); box-shadow:var(--shadow-soft-dark);
+    cursor:pointer; transition:border-color .2s ease, transform .18s cubic-bezier(.22,.9,.3,1);
+  }
+  .dash-event-card:hover{ border-color:var(--safety); transform:translateY(-1px); }
+  .dash-event-date{
+    width:44px; height:44px; border-radius:12px; background:rgba(232,172,31,.12);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .dash-event-date span{ font-family:'Oswald'; font-size:16px; font-weight:700; color:var(--safety); line-height:1; }
+  .dash-event-date small{ font-size:9px; font-weight:700; color:var(--safety); letter-spacing:.5px; margin-top:2px; }
+  .dash-event-name{ font-size:13.5px; font-weight:600; color:var(--paper-on-transit); }
+
+  /* ============ BOTTOM NAV (estilo Apple: flutuante, cantos arredondados, sombra suave) ============ */
+  body.has-nav .screen{ padding-bottom:96px; }
+  .bottom-nav{
+    position:fixed; left:14px; right:14px; bottom:14px;
+    max-width:492px; margin:0 auto;
+    display:flex;
+    background:rgba(22,22,21,.86);
+    backdrop-filter:blur(20px) saturate(180%);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:24px;
+    box-shadow:var(--shadow-soft-dark);
+    z-index:20;
+  }
+  .bottom-nav a{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:4px; padding:13px 0 11px; text-decoration:none; position:relative;
+    color:#8a8a86; font-size:10px; font-weight:600; font-family:'Inter'; cursor:pointer;
+    transition:color .2s ease;
+  }
+  .bottom-nav a.active{ color:var(--safety); }
+  .bottom-nav a.active::before{
+    content:''; position:absolute; top:3px; left:50%; transform:translateX(-50%);
+    width:40px; height:32px; border-radius:11px; background:rgba(232,172,31,.13);
+    animation:navPill .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes navPill{ from{ opacity:0; transform:translateX(-50%) scale(.7); } to{ opacity:1; transform:translateX(-50%) scale(1); } }
+  .bottom-nav svg{ width:23px; height:23px; transition:transform .2s cubic-bezier(.34,1.56,.64,1); position:relative; z-index:1; }
+  .bottom-nav a span{ position:relative; z-index:1; }
+  .bottom-nav a.active svg{ transform:translateY(-1px) scale(1.06); }
+
+  .fab-new{
+    position:fixed; right:22px; bottom:96px;
+    width:58px; height:58px; border-radius:18px;
+    background:linear-gradient(150deg, #F5C242, var(--safety));
+    color:#0a0a0a;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 16px 32px -10px rgba(232,172,31,.6), 0 4px 12px -2px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.3);
+    cursor:pointer; z-index:21;
+    transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease;
+  }
+  .fab-new:hover{ transform:scale(1.06) rotate(4deg); }
+  .fab-new:active{ transform:scale(.92); box-shadow:0 8px 18px -8px rgba(232,172,31,.5), inset 0 1px 0 rgba(255,255,255,.2); }
+  .fab-new svg{ width:24px; height:24px; }
+
+  /* ============ LISTS (bikes / clientes / eventos) ============ */
+  .list-wrap{ max-width:520px; margin:0 auto; padding:22px 20px 22px; }
+  .list-search{
+    width:100%; padding:14px 16px 14px 46px; margin:16px 0 20px;
+    background:var(--transit-2); border:1.5px solid var(--transit-line);
+    border-radius:var(--radius-md);
+    color:var(--paper-on-transit); font-family:'Inter'; font-size:14px; outline:none;
+    box-shadow:var(--shadow-soft-dark);
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .list-search:focus{ border-color:var(--safety); box-shadow:0 0 0 3px rgba(232,172,31,.14); }
+  .list-search-wrap{ position:relative; }
+  .list-search-wrap svg{
+    position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    width:17px; height:17px; color:#7691a0; pointer-events:none;
+  }
+  .list-item{
+    display:flex; align-items:center; gap:14px;
+    padding:17px 16px; margin-bottom:14px;
+    background:var(--transit-2); border:1px solid var(--transit-line);
+    border-radius:var(--radius-md);
+    cursor:pointer; text-decoration:none; color:var(--paper-on-transit);
+    box-shadow:var(--shadow-soft-dark);
+    transition:transform .18s cubic-bezier(.22,.9,.3,1), border-color .2s ease;
+  }
+  .list-item:hover{ border-color:var(--safety); transform:translateY(-1px); }
+  .list-item:active{ transform:scale(.98); }
+  .list-item-main{ flex:1; }
+  .list-item-title{ font-weight:600; font-size:14.5px; }
+  .list-item-sub{ font-size:11.5px; color:#9FB6C1; margin-top:4px; font-family:'JetBrains Mono'; }
+  .status-badge{
+    font-family:'Inter'; font-size:10px; font-weight:700; text-transform:uppercase;
+    padding:5px 11px; border-radius:20px; letter-spacing:.4px; flex-shrink:0;
+  }
+  .status-entregue{ background:#1a3a24; color:#4ADE80; }
+  .status-em_transporte{ background:#123a5c; color:#5EA8E8; }
+  .status-aguardando{ background:#4a3a12; color:#F5C242; }
+  .status-problema{ background:#4a1414; color:#F56262; }
+  .status-cancelada{ background:#2a2a2a; color:#888; }
+  .list-empty{ text-align:center; padding:50px 20px; color:#7691a0; font-size:13px; }
+
+  /* ============ BIKE DETAIL ============ */
+  .detail-cover{
+    width:100%; aspect-ratio:16/9; background:var(--transit-2);
+    border-bottom:1px solid var(--transit-line);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .detail-cover-empty{ font-size:42px; opacity:.3; }
+  .detail-cover img{ width:100%; height:100%; object-fit:cover; }
+  .detail-hero{
+    padding:24px 20px; text-align:center;
+    background:linear-gradient(180deg, var(--transit-2), var(--transit));
+  }
+  .detail-name{ font-family:'Oswald'; font-size:21px; color:var(--paper-on-transit); text-transform:uppercase; margin-top:12px; }
+  .detail-sub{ font-size:12px; color:#9FB6C1; margin-top:5px; }
+  .detail-section-head{
+    max-width:520px; margin:0 auto; padding:26px 20px 0;
+    display:flex; align-items:baseline; gap:10px;
+  }
+  .detail-section-head .section-num{ color:var(--safety); }
+  .detail-section-head .section-title{ color:var(--paper-on-transit); }
+  .detail-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px 20px 6px; max-width:520px; margin:0 auto; }
+  .detail-field{ background:var(--transit-2); border:1px solid var(--transit-line); border-radius:var(--radius-md); padding:14px 16px; box-shadow:var(--shadow-soft-dark); }
+  .detail-field .k{ font-size:10.5px; color:#7691a0; text-transform:uppercase; letter-spacing:.5px; }
+  .detail-field .v{ font-size:14px; color:var(--paper-on-transit); margin-top:5px; font-weight:600; }
+  .detail-actions{ display:flex; gap:12px; padding:16px 20px 0; max-width:520px; margin:0 auto; }
+  .detail-actions .dash-action{ flex:1; justify-content:center; text-align:center; }
+  .detail-actions + .detail-actions{ padding-bottom:26px; }
+
+  /* ============ GALERIA DE FOTOS ============ */
+  .gallery-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .gallery-card{
+    position:relative; aspect-ratio:1/1; border-radius:var(--radius-md); overflow:hidden;
+    background:var(--transit-2); border:1px solid var(--transit-line); box-shadow:var(--shadow-soft-dark);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .gallery-card img{ width:100%; height:100%; object-fit:cover; }
+  .gallery-card-empty{ color:#3a4a52; font-size:30px; }
+  .gallery-label{
+    position:absolute; left:0; right:0; bottom:0; padding:9px 10px;
+    background:linear-gradient(0deg, rgba(0,0,0,.8), transparent);
+    font-size:11.5px; font-weight:600; color:var(--paper-on-transit);
+  }
+
+  /* ============ STAGE STEPPER (progresso da bike) ============ */
+  .stage-track{ padding:18px 0 6px; }
+  .stage-item{ display:flex; align-items:flex-start; gap:14px; position:relative; padding-bottom:24px; }
+  .stage-item::before{
+    content:''; position:absolute; left:11px; top:24px; bottom:0; width:2px;
+    background:var(--transit-line);
+  }
+  .stage-item:last-child{ padding-bottom:0; }
+  .stage-item:last-child::before{ display:none; }
+  .stage-item.done::before{ background:var(--safety); }
+  .stage-dot{
+    width:24px; height:24px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    border:2px solid var(--transit-line); background:var(--transit-2);
+    transition:all .2s ease;
+  }
+  .stage-dot svg{ width:12px; height:12px; }
+  .stage-item.done .stage-dot{ background:var(--safety); border-color:var(--safety); }
+  .stage-item.current .stage-dot{ border-color:var(--safety); box-shadow:0 0 0 4px rgba(232,172,31,.18); }
+  .stage-item.current .stage-dot::after{ content:''; width:8px; height:8px; border-radius:50%; background:var(--safety); }
+  .stage-label{ font-size:14px; font-weight:600; padding-top:2px; color:#54646c; }
+  .stage-item.done .stage-label{ color:var(--paper-on-transit); }
+  .stage-item.current .stage-label{ color:var(--safety); }
+
+  /* ============ TIMELINE ============ */
+  .tl-item{ display:flex; gap:14px; padding-bottom:22px; position:relative; }
+  .tl-item::before{
+    content:''; position:absolute; left:9px; top:22px; bottom:0; width:1.5px; background:var(--transit-line);
+  }
+  .tl-item:last-child::before{ display:none; }
+  .tl-dot{ width:20px; height:20px; border-radius:50%; background:var(--safety); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .tl-dot svg{ width:11px; height:11px; }
+  .tl-content{ padding-top:1px; }
+  .tl-etapa{ font-size:13.5px; font-weight:600; color:var(--paper-on-transit); }
+  .tl-meta{ font-size:11px; color:#7691a0; margin-top:2px; font-family:'JetBrains Mono'; }
+
+  /* ============ QR CODE ============ */
+  .qr-wrap{ max-width:420px; margin:0 auto; padding:30px 20px 60px; text-align:center; }
+  .qr-card{
+    background:#fff; padding:24px; border-radius:16px; display:inline-block;
+    box-shadow:0 14px 34px -12px rgba(0,0,0,.5);
+  }
+  .qr-bike-name{ font-family:'Oswald'; font-size:18px; color:var(--paper-on-transit); text-transform:uppercase; margin-top:20px; }
+  .qr-bike-sub{ font-size:12px; color:#9FB6C1; margin-top:4px; font-family:'JetBrains Mono'; }
+  .qr-hint{ font-size:12.5px; color:#7691a0; margin-top:20px; line-height:1.6; }
+
+  /* ============ RELATÓRIOS ============ */
+  .report-summary{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px; }
+  .report-card{ background:var(--transit-2); border:1px solid var(--transit-line); padding:20px 18px; border-radius:var(--radius-md); box-shadow:var(--shadow-soft-dark); }
+  .report-card .num{ font-family:'Oswald'; font-size:30px; font-weight:700; color:var(--safety); line-height:1; }
+  .report-card .lbl{ font-size:11.5px; color:#9FB6C1; margin-top:8px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
+  .report-section{ margin-top:32px; }
+  .report-section h3{
+    font-family:'Oswald'; font-weight:600; font-size:11.5px; color:var(--safety);
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:14px;
+  }
+  .chart-box{ background:var(--transit-2); border:1px solid var(--transit-line); padding:18px; border-radius:var(--radius-md); box-shadow:var(--shadow-soft-dark); position:relative; height:220px; }
+  .recorrente-item{ display:flex; justify-content:space-between; padding:15px 16px; background:var(--transit-2); border:1px solid var(--transit-line); border-radius:var(--radius-md); box-shadow:var(--shadow-soft-dark); margin-bottom:12px; font-size:13px; color:var(--paper-on-transit); transition:transform .15s ease; }
+  .recorrente-item:active{ transform:scale(.98); }
+  .recorrente-item b{ color:var(--safety); }
+
+  /* ============ FORM SHELL ============ */
+  .form-wrap{ max-width:560px; margin:0 auto; padding:30px 20px 84px; }
+  .section-head{ margin:40px 0 16px; padding-bottom:9px; border-bottom:2px solid var(--ink); display:flex; align-items:baseline; gap:10px; }
+  .section-head:first-child{ margin-top:0; }
+  .section-num{ font-family:'JetBrains Mono'; font-size:12px; color:var(--safety-dark); }
+  .section-title{ font-family:'Oswald'; font-weight:600; font-size:16px; text-transform:uppercase; letter-spacing:.5px; }
+
+  .field{ margin-bottom:20px; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; margin-bottom:7px; color:var(--ink); }
+  .field .hint{ font-size:11.5px; color:var(--ink-soft); margin-top:6px; line-height:1.5; }
+  .field input[type=text], .field input[type=email], .field input[type=tel],
+  .field input[type=date], .field input[type=number], .field select, .field textarea{
+    width:100%;
+    padding:14px 15px;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-md);
+    background:#fff;
+    font-family:'Inter';
+    font-size:14.5px;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .field textarea{ resize:vertical; min-height:70px; }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--safety); box-shadow:0 0 0 3px rgba(232,172,31,.12); }
+  .radio-row{ display:flex; gap:10px; }
+  .radio-opt{
+    flex:1; text-align:center; padding:14px; border:1.5px solid var(--line);
+    border-radius:var(--radius-md);
+    font-weight:600; font-size:13.5px; cursor:pointer; user-select:none;
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .radio-opt:active{ transform:scale(.96); }
+  .radio-opt.sel{ border-color:var(--safety); background:var(--safety); color:#fff; }
+  .check-row{ display:flex; gap:10px; align-items:flex-start; padding:17px; border:1.5px solid var(--line); border-radius:var(--radius-md); transition:border-color .15s ease; }
+  .check-row:focus-within{ border-color:var(--safety); }
+  .check-row input{ margin-top:3px; width:16px; height:16px; accent-color:var(--safety); flex-shrink:0; }
+  .check-row span{ font-size:13px; line-height:1.5; color:var(--ink-soft); }
+
+  .submit-btn{
+    width:100%; margin-top:30px;
+    background:var(--ink); color:var(--paper);
+    border:none; padding:18px;
+    border-radius:var(--radius-md);
+    font-family:'Oswald'; font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:1px;
+    cursor:pointer;
+    box-shadow:var(--shadow-soft);
+    transition:background .15s ease, transform .15s ease;
+  }
+  .submit-btn:hover{ background:var(--safety); transform:translateY(-1px); }
+  .submit-btn:active{ transform:scale(.98); }
+  .error-note{ color:var(--safety-dark); font-size:12.5px; margin-top:10px; display:none; font-weight:600; }
+
+  /* ============ TICKET / TAG (assinatura visual) ============ */
+  .ticket-wrap{ max-width:420px; margin:40px auto 80px; padding:0 20px; }
+  .ticket{
+    background:#fff; border:2px solid var(--ink); position:relative;
+    padding:26px 22px;
+    box-shadow:0 14px 34px -12px rgba(23,21,18,.35);
+  }
+  .ticket::before, .ticket::after{
+    content:''; position:absolute; width:20px; height:20px; background:var(--paper);
+    border-radius:50%; top:50%; transform:translateY(-50%);
+  }
+  .ticket::before{ left:-11px; border-right:2px solid var(--ink); }
+  .ticket::after{ right:-11px; border-left:2px solid var(--ink); }
+  .ticket-top{ display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:16px; border-bottom:2px dashed var(--line); }
+  .ticket-code{ font-family:'JetBrains Mono'; font-weight:600; font-size:19px; letter-spacing:1px; }
+  .ticket-status{ font-family:'Oswald'; font-size:11px; text-transform:uppercase; background:var(--ok); color:#fff; padding:4px 9px; letter-spacing:.5px; }
+  .ticket-body{ padding-top:16px; display:flex; flex-direction:column; gap:10px; }
+  .ticket-row{ display:flex; justify-content:space-between; font-size:13px; gap:12px; }
+  .ticket-row .k{ color:var(--ink-soft); }
+  .ticket-row .v{ font-weight:600; text-align:right; }
+  .ticket-actions{ display:flex; gap:10px; margin-top:20px; }
+  .ticket-actions button{
+    flex:1; padding:13px; font-family:'Oswald'; font-weight:600; font-size:12.5px;
+    text-transform:uppercase; letter-spacing:.5px; cursor:pointer; border:1.5px solid var(--ink);
+  }
+  .btn-wa{ background:var(--ink); color:#fff; }
+  .btn-copy{ background:#fff; color:var(--ink); }
+
+  /* ============ CHECKLIST (staff / transit) ============ */
+  .transit-bg{ background:var(--transit); min-height:100vh; }
+  .form-wrap.transit{ color:var(--paper-on-transit); }
+  .form-wrap.transit .section-head{ border-bottom-color:var(--transit-line); }
+  .form-wrap.transit .section-title{ color:var(--paper-on-transit); }
+  .form-wrap.transit .field label{ color:var(--paper-on-transit); }
+  .form-wrap.transit .hint{ color:#9FB6C1; }
+  .form-wrap.transit input, .form-wrap.transit select, .form-wrap.transit textarea{
+    background:var(--transit-2); border-color:var(--transit-line); color:var(--paper-on-transit);
+  }
+  .form-wrap.transit input::placeholder{ color:#6E8B9A; }
+
+  .stamp-item{
+    display:flex; align-items:center; gap:14px;
+    padding:17px; border:1.5px solid var(--transit-line);
+    border-radius:var(--radius-md);
+    margin-bottom:13px; cursor:pointer; user-select:none;
+    background:var(--transit-2);
+    box-shadow:var(--shadow-soft-dark);
+    transition:border-color .18s ease, background .18s ease, transform .15s ease;
+  }
+  .stamp-item:active{ transform:scale(.98); }
+  .stamp-item.checked{ border-color:var(--safety); background:rgba(232,172,31,.08); }
+  .stamp-box{
+    flex-shrink:0; width:32px; height:32px; border:2px solid var(--transit-line);
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Oswald'; font-size:9px; font-weight:700; color:transparent;
+    transform:rotate(0deg) scale(1);
+    transition:transform .28s cubic-bezier(.34,1.56,.64,1), border-color .18s ease, color .18s ease, background .18s ease;
+  }
+  .stamp-item.checked .stamp-box{
+    border-color:var(--safety); color:var(--safety); transform:rotate(-8deg) scale(1.08);
+    background:rgba(232,172,31,.15);
+  }
+  .stamp-label{ font-size:13.5px; font-weight:500; }
+  .checklist-cat-head{
+    font-family:'Oswald'; font-size:11.5px; font-weight:600; text-transform:uppercase;
+    letter-spacing:1px; color:var(--safety); margin:22px 0 12px;
+  }
+  .checklist-cat-head:first-child{ margin-top:4px; }
+  .tab-row{ display:flex; gap:10px; margin-top:22px; }
+  .tab-btn{
+    flex:1; padding:14px; text-align:center; font-family:'Oswald'; font-size:12.5px;
+    text-transform:uppercase; letter-spacing:.5px; border:1.5px solid var(--transit-line);
+    border-radius:var(--radius-md);
+    background:var(--transit-2); color:#9FB6C1; cursor:pointer;
+    transition:border-color .2s ease, color .2s ease, background .2s ease, transform .15s ease;
+  }
+  .tab-btn:active{ transform:scale(.97); }
+  .tab-btn.active{ border-color:var(--safety); color:var(--safety); background:rgba(232,172,31,.08); }
+  .tab-panel{ display:none; margin-top:18px; }
+  .tab-panel.active{ display:block; animation:fade .3s cubic-bezier(.16,1,.3,1); }
+
+  /* ============ PERFIL (tela Mais) ============ */
+  .profile-card{
+    display:flex; align-items:center; gap:16px;
+    background:var(--transit-2); border:1px solid var(--transit-line);
+    border-radius:var(--radius-md); padding:20px; box-shadow:var(--shadow-soft-dark);
+  }
+  .profile-avatar{
+    width:52px; height:52px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(150deg, #F5C242, var(--safety));
+    color:#0a0a0a; font-family:'Oswald'; font-weight:700; font-size:18px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 16px -4px rgba(232,172,31,.5);
+  }
+  .profile-name{ font-family:'Oswald'; font-size:16px; font-weight:600; color:var(--paper-on-transit); text-transform:uppercase; letter-spacing:.3px; }
+  .profile-role{ font-size:12px; color:var(--safety); margin-top:3px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+
+  @media (prefers-reduced-motion: reduce){ .screen.active{ animation:none; } }
 </style>
 </head>
 <body>
 
-<div class="card">
-
-  <div class="banner"></div>
-
-  <div class="header reveal visible">
-    <div class="avatar-wrap">
-      <div class="avatar-glow"></div>
-      <div class="avatar"><img src="500.png" alt="João Santos"></div>
-    </div>
-
-    <h1>João Santos</h1>
-
-    <div class="role">Sites · Automação · Gestão Digital</div>
-    <p class="tagline">Transformando empresas em resultados digitais.</p>
-    <p class="bio">Crio sites, automações de chatbot, biosites e landing pages que ajudam pequenos negócios a vender mais e parecer maiores online.</p>
-
-    <div class="proof">
-      <div class="proof-chip">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B7EFF" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-        Atendimento em todo o Brasil
+<!-- ============ LOGIN ============ -->
+<div class="screen" id="screen-login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-mark">
+          <img src="gerna-logo.svg" alt="Gerna Bikes">
+        </div>
+        <div class="brand-name">Gerna Bikes</div>
       </div>
-      <div class="proof-chip">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B7EFF" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-        Projetos personalizados
-      </div>
-      <div class="proof-chip">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B7EFF" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-        Suporte durante o desenvolvimento
-      </div>
+      <div class="login-title">Entrar</div>
+      <div class="login-sub">Acesso restrito à equipe Gerna Bikes.</div>
+
+      <form id="formLogin">
+        <div class="login-field">
+          <label>E-mail</label>
+          <input type="email" id="login-email" required autocomplete="username">
+        </div>
+        <div class="login-field">
+          <label>Senha</label>
+          <input type="password" id="login-senha" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="login-btn" id="loginBtn">Entrar</button>
+        <div class="login-error" id="loginError">E-mail ou senha incorretos.</div>
+      </form>
     </div>
   </div>
-
-  <div class="cta-wrap reveal visible">
-    <a class="cta" href="https://wa.me/5522992286480" target="_blank" rel="noopener noreferrer">
-      <div class="cta-icon"><img src="501.png" alt="WhatsApp"></div>
-      <div class="cta-text">
-        <div class="cta-title">Solicitar orçamento</div>
-        <div class="cta-sub">Fale agora comigo no WhatsApp</div>
-      </div>
-      <div class="cta-arrow">→</div>
-    </a>
-
-    <a class="cta-secondary" href="https://wa.me/5522992286480" target="_blank" rel="noopener noreferrer">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-      Ver Portfólio
-    </a>
-  </div>
-
-  <div class="sobre panel reveal">
-    <div class="sec-title">
-      <div class="ic">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      </div>
-      <h2>Sobre mim</h2>
-    </div>
-    <p>Sou desenvolvedor web freelancer, no Rio de Janeiro, especializado em criar presenças digitais completas — do site institucional ao chatbot que atende seu cliente automaticamente.</p>
-    <p>Trabalho direto com pequenos negócios que querem parecer, e vender, mais profissional online — sem burocracia e com acompanhamento próximo em cada etapa.</p>
-  </div>
-
-  <div class="steps-wrap reveal">
-    <div class="sec-title" style="padding:0 4px;">
-      <div class="ic">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      </div>
-      <h2>Como funciona</h2>
-    </div>
-    <div class="steps">
-      <div class="step panel">
-        <div class="step-num">01</div>
-        <div>
-          <div class="step-title">Você entra em contato</div>
-          <div class="step-sub">Chama no WhatsApp e conta o que precisa</div>
-        </div>
-      </div>
-      <div class="step panel">
-        <div class="step-num">02</div>
-        <div>
-          <div class="step-title">Conversamos sobre o projeto</div>
-          <div class="step-sub">Alinhamos escopo, prazo e valor</div>
-        </div>
-      </div>
-      <div class="step panel">
-        <div class="step-num">03</div>
-        <div>
-          <div class="step-title">Desenvolvimento</div>
-          <div class="step-sub">Construo e te mantenho atualizado</div>
-        </div>
-      </div>
-      <div class="step panel">
-        <div class="step-num">04</div>
-        <div>
-          <div class="step-title">Entrega</div>
-          <div class="step-sub">Site no ar, revisado e pronto pra vender</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="testi-wrap reveal">
-    <div class="sec-title" style="padding:0 4px;">
-      <div class="ic">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17.75l-6.16 3.24 1.18-6.88L2 9.24l6.92-1L12 2l3.08 6.24 6.92 1-5.02 4.87 1.18 6.88z"/></svg>
-      </div>
-      <h2>Depoimentos</h2>
-    </div>
-
-    <div class="testi panel">
-      <div class="testi-quote">
-        <svg width="20" height="16" viewBox="0 0 24 20" fill="currentColor"><path d="M0 20V11.5C0 5.1 4.2.6 10 0v3.6C6.4 4.4 4 7 4 11h6v9H0zm14 0V11.5C14 5.1 18.2.6 24 0v3.6c-3.6.8-6 3.4-6 7.4h6v9H14z"/></svg>
-      </div>
-      <p>"O João entendeu exatamente o que minha empresa precisava. O site ficou profissional e o WhatsApp integrado facilitou muito o atendimento aos clientes."</p>
-      <div class="testi-author">
-        <div class="testi-avatar">MT</div>
-        <div>
-          <div class="testi-name">Mello's Transportes</div>
-          <div class="testi-role">Mudanças · Rio de Janeiro</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="testi panel">
-      <div class="testi-quote">
-        <svg width="20" height="16" viewBox="0 0 24 20" fill="currentColor"><path d="M0 20V11.5C0 5.1 4.2.6 10 0v3.6C6.4 4.4 4 7 4 11h6v9H0zm14 0V11.5C14 5.1 18.2.6 24 0v3.6c-3.6.8-6 3.4-6 7.4h6v9H14z"/></svg>
-      </div>
-      <p>"Atendimento rápido do início ao fim. Entregou o projeto no prazo combinado e ainda deu dicas de como melhorar minha presença online."</p>
-      <div class="testi-author">
-        <div class="testi-avatar">RS</div>
-        <div>
-          <div class="testi-name">RSantosLog</div>
-          <div class="testi-role">Transportes</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="testi panel">
-      <div class="testi-quote">
-        <svg width="20" height="16" viewBox="0 0 24 20" fill="currentColor"><path d="M0 20V11.5C0 5.1 4.2.6 10 0v3.6C6.4 4.4 4 7 4 11h6v9H0zm14 0V11.5C14 5.1 18.2.6 24 0v3.6c-3.6.8-6 3.4-6 7.4h6v9H14z"/></svg>
-      </div>
-      <p>"Meu cardápio digital ficou lindo e muito fácil de usar. Meus clientes elogiam toda hora. Recomendo demais o trabalho dele."</p>
-      <div class="testi-author">
-        <div class="testi-avatar">PN</div>
-        <div>
-          <div class="testi-name">Pizzas D'Nana</div>
-          <div class="testi-role">Cardápio Digital</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider reveal"><span>Meus serviços</span></div>
-
-  <div class="grid" id="grid"></div>
-
-  <div class="faq-wrap reveal">
-    <div class="sec-title" style="padding:0 4px;">
-      <div class="ic">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      </div>
-      <h2>Perguntas Frequentes</h2>
-    </div>
-
-    <div class="faq-list">
-      <details class="faq-item panel">
-        <summary>Quanto custa um site?<span class="faq-plus">+</span></summary>
-        <div class="faq-answer">Cada projeto é orçado de acordo com o que você precisa — número de páginas, funcionalidades e prazo. Me chama no WhatsApp e te passo um valor personalizado sem compromisso.</div>
-      </details>
-      <details class="faq-item panel">
-        <summary>Quanto tempo leva pra ficar pronto?<span class="faq-plus">+</span></summary>
-        <div class="faq-answer">Depende da complexidade, mas a maioria dos projetos fica pronta em poucos dias após alinharmos o escopo. Te mantenho atualizado durante todo o processo.</div>
-      </details>
-      <details class="faq-item panel">
-        <summary>Preciso já ter domínio e hospedagem?<span class="faq-plus">+</span></summary>
-        <div class="faq-answer">Não. Posso te orientar do zero — desde escolher o nome do domínio até deixar o site publicado e no ar.</div>
-      </details>
-      <details class="faq-item panel">
-        <summary>Você faz manutenção depois de pronto?<span class="faq-plus">+</span></summary>
-        <div class="faq-answer">Sim, ofereço suporte pra ajustes e atualizações após a entrega. A gente combina os detalhes conforme a necessidade do seu negócio.</div>
-      </details>
-      <details class="faq-item panel">
-        <summary>Como funciona o pagamento?<span class="faq-plus">+</span></summary>
-        <div class="faq-answer">Geralmente dividido em etapas: um sinal pra iniciar o projeto e o restante na entrega. Conversamos sobre isso já no primeiro contato.</div>
-      </details>
-    </div>
-  </div>
-
-  <footer class="reveal">
-    <div class="footer-name">João Santos</div>
-    <div class="footer-location">Rio de Janeiro · Brasil</div>
-    <div class="footer-links">
-      <a href="https://wa.me/5522992286480" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-      <a href="mailto:contato@joaosantos.com">E-mail</a>
-    </div>
-    <div class="footer-copy">© 2026 João Santos. Todos os direitos reservados.</div>
-  </footer>
 </div>
 
-<a href="#top" class="to-top" id="toTop" aria-label="Voltar ao topo">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-</a>
+<div class="splash-screen" id="screen-loading">
+  <div class="splash-logo"><img src="gerna-logo.svg" alt="Gerna Bikes"></div>
+  <div class="splash-name">Gerna Bikes</div>
+  <div class="splash-tagline">Transporte de bicicletas</div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div class="screen" id="screen-dashboard">
+  <div class="app-header">
+    <div class="app-header-top">
+      <div class="app-header-brand">
+        <div class="brand-mark lg">
+          <img src="gerna-logo.svg" alt="Gerna Bikes">
+        </div>
+        <div>
+          <div class="app-header-name">Gerna Bikes</div>
+          <div class="app-header-date" id="headerDate">—</div>
+        </div>
+      </div>
+      <button class="logout-btn" id="logoutBtn">Sair</button>
+    </div>
+    <div class="app-header-greeting" id="headerGreeting">Olá!</div>
+  </div>
+
+  <div class="dash-wrap">
+    <div class="eyebrow" style="color:var(--safety);">Painel</div>
+    <h1 class="page-title">Visão geral</h1>
+
+    <div class="dash-grid">
+      <div class="dash-stat stagger-in" style="animation-delay:0ms">
+        <div class="dash-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="15" height="10" rx="1.5"/><path d="M16 10h3.5L22 13.5V17h-6"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg></div>
+        <div class="dash-stat-num" id="statTransporte">0</div>
+        <div class="dash-stat-label">Em transporte</div>
+      </div>
+      <div class="dash-stat stagger-in" style="animation-delay:60ms">
+        <div class="dash-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="dash-stat-num" id="statEntregue">0</div>
+        <div class="dash-stat-label">Entregues</div>
+      </div>
+      <div class="dash-stat stagger-in" style="animation-delay:120ms">
+        <div class="dash-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+        <div class="dash-stat-num" id="statAguardando">0</div>
+        <div class="dash-stat-label">Aguardando retirada</div>
+      </div>
+      <div class="dash-stat stagger-in" style="animation-delay:180ms">
+        <div class="dash-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.5h6V4M8.5 12l2 2 4.5-4.5"/></svg></div>
+        <div class="dash-stat-num" id="statChecklist">0</div>
+        <div class="dash-stat-label">Aguardando checklist</div>
+      </div>
+    </div>
+
+    <div class="chart-box" style="margin-top:20px; height:170px;">
+      <canvas id="dashMiniChart"></canvas>
+    </div>
+
+    <div class="search-field">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" class="dash-search" id="dashSearch" placeholder="Buscar atleta, CPF, série ou evento">
+    </div>
+    <div id="dashSearchResults"></div>
+
+    <div class="dash-actions">
+      <div class="dash-action" onclick="showScreen('screen-cadastro')">+ Novo cadastro de atleta <span>→</span></div>
+      <div class="dash-action" onclick="showScreen('screen-checklist')">Fazer checklist <span>→</span></div>
+    </div>
+
+    <div class="dash-section-head">
+      <span class="eyebrow" style="color:var(--safety);">Próximos eventos</span>
+    </div>
+    <div class="dash-events-list" id="dashProximosEventos">
+      <div class="skel-card"><div class="skel skel-avatar"></div><div class="skel-lines"><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CADASTRO (ATLETA) ============ -->
+<div class="screen" id="screen-cadastro">
+  <div class="topbar">
+    <button class="back-btn" onclick="showScreen('screen-dashboard')">← Voltar</button>
+    <div class="brand-name">Cadastro</div>
+    <div style="width:70px;"></div>
+  </div>
+
+  <form class="form-wrap" id="formCadastro">
+
+    <div class="section-head"><span class="section-num">01</span><span class="section-title">Evento</span></div>
+    <div class="field">
+      <label>Para qual evento levaremos sua bicicleta *</label>
+      <select id="f_evento" required>
+        <option value="">Selecione o evento</option>
+      </select>
+    </div>
+    <div class="field" id="wrap_outroEvento" style="display:none;">
+      <label>Qual evento?</label>
+      <input type="text" id="f_outroEvento" placeholder="Nome do evento">
+    </div>
+    <div class="field">
+      <label>Primeira vez utilizando nosso serviço? Se sim, onde nos conheceu?</label>
+      <input type="text" id="f_primeiraVez" placeholder="Ex: Indicação, Instagram, no evento passado...">
+    </div>
+
+    <div class="section-head"><span class="section-num">02</span><span class="section-title">Seus dados</span></div>
+    <div class="field"><label>Nome completo *</label><input type="text" id="f_nome" required></div>
+    <div class="field"><label>Melhor e-mail *</label><input type="email" id="f_email" required></div>
+    <div class="field"><label>Telefone (WhatsApp) *</label><input type="tel" id="f_telefone" placeholder="(00) 00000-0000" required></div>
+    <div class="field"><label>CPF *</label><input type="text" id="f_cpf" placeholder="000.000.000-00" required></div>
+    <div class="field"><label>Data de nascimento</label><input type="date" id="f_nascimento"></div>
+    <div class="field"><label>Equipe ou assessoria</label><input type="text" id="f_equipe"></div>
+    <div class="field"><label>Instagram</label><input type="text" id="f_instagram" placeholder="@seuinstagram"></div>
+
+    <div class="section-head"><span class="section-num">03</span><span class="section-title">Endereço</span></div>
+    <div class="field"><label>Endereço completo *</label><input type="text" id="f_endereco" required></div>
+    <div class="field"><label>CEP *</label><input type="text" id="f_cep" required></div>
+    <div class="field"><label>Cidade / Estado *</label><input type="text" id="f_cidade" placeholder="Ex: Rio de Janeiro / RJ" required></div>
+
+    <div class="section-head"><span class="section-num">04</span><span class="section-title">Dados da bike</span></div>
+    <div class="field"><label>Marca da bike *</label><input type="text" id="f_marca" required></div>
+    <div class="field"><label>Modelo da bike *</label><input type="text" id="f_modelo" required></div>
+    <div class="field"><label>Grupo da bike</label><input type="text" id="f_grupo" placeholder="Ex: Shimano Ultegra Di2"></div>
+    <div class="field"><label>Cor da bike *</label><input type="text" id="f_cor" required></div>
+    <div class="field"><label>Marca da roda</label><input type="text" id="f_roda"></div>
+    <div class="field"><label>Número de série do quadro *</label><input type="text" id="f_serie" required></div>
+
+    <div class="section-head"><span class="section-num">05</span><span class="section-title">Seguro</span></div>
+    <div class="field">
+      <label>Valor da bike + rodas (R$) *</label>
+      <input type="text" id="f_valor" placeholder="Ex: 25.000" required>
+      <div class="hint">Cada bike é assegurada individualmente. O valor do seguro é ajustado conforme o valor informado, sujeito à validação da seguradora.</div>
+    </div>
+
+    <div class="section-head"><span class="section-num">06</span><span class="section-title">Logística</span></div>
+    <div class="field">
+      <label>Deseja que levemos também uma mochila (roupa de borracha, sapatilha, tênis, CO2...)? *</label>
+      <div class="radio-row">
+        <div class="radio-opt" data-group="mochila" data-value="Sim" onclick="selectRadio(this)">Sim</div>
+        <div class="radio-opt" data-group="mochila" data-value="Não" onclick="selectRadio(this)">Não</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Loja credenciada para retirada e devolução *</label>
+      <select id="f_loja" required><option value="">Selecione a loja</option></select>
+    </div>
+
+    <div class="section-head"><span class="section-num">07</span><span class="section-title">Informações adicionais</span></div>
+    <div class="field"><label>Alguma informação extra que devemos saber?</label><textarea id="f_infoExtra"></textarea></div>
+    <div class="field"><label>Sugestões e feedbacks</label><textarea id="f_sugestoes"></textarea></div>
+
+    <div class="section-head"><span class="section-num">08</span><span class="section-title">Termo</span></div>
+    <div class="check-row" style="margin-bottom:12px;">
+      <input type="checkbox" id="f_privacidade" required>
+      <span>Li e estou ciente da política de segurança de dados: minhas informações são tratadas com estrita confidencialidade.</span>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="f_responsabilidade" required>
+      <span>Estou ciente que assumo total responsabilidade pelas informações fornecidas neste formulário.</span>
+    </div>
+
+    <div class="error-note" id="cadastroError">Preencha todos os campos obrigatórios (*) antes de enviar.</div>
+    <button type="submit" class="submit-btn">Gerar meu comprovante</button>
+  </form>
+</div>
+
+<!-- ============ TICKET DE CONFIRMAÇÃO ============ -->
+<div class="screen" id="screen-ticket">
+  <div class="topbar">
+    <button class="back-btn" onclick="showScreen('screen-dashboard')">← Início</button>
+    <div class="brand-name">Comprovante</div>
+    <div style="width:60px;"></div>
+  </div>
+  <div class="ticket-wrap">
+    <div class="ticket">
+      <div class="ticket-top">
+        <div>
+          <div class="eyebrow" style="color:var(--ink-soft);">Gerna Bikes</div>
+          <div class="ticket-code mono" id="ticketCode">GB-000000</div>
+        </div>
+        <div class="ticket-status">Pronto p/ envio</div>
+      </div>
+      <div class="ticket-body" id="ticketBody"></div>
+      <div class="ticket-actions">
+        <button class="btn-wa" onclick="sendCadastroWhatsapp()">Enviar no WhatsApp</button>
+        <button class="btn-copy" onclick="copyCadastroSummary()">Copiar resumo</button>
+      </div>
+    </div>
+    <p class="hint" style="text-align:center; margin-top:16px;">Guarde esse código — ele identifica seu cadastro até a bike ser devolvida.</p>
+  </div>
+</div>
+
+<!-- ============ CHECKLIST (EQUIPE) ============ -->
+<div class="screen transit-bg" id="screen-checklist">
+  <div class="topbar dark">
+    <button class="back-btn" onclick="showScreen('screen-dashboard')">← Voltar</button>
+    <div class="brand-name" style="color:var(--paper-on-transit);">Checklist</div>
+    <div style="width:70px;"></div>
+  </div>
+
+  <form class="form-wrap transit" id="formChecklist">
+    <div class="section-head"><span class="section-num">01</span><span class="section-title">Identificação</span></div>
+    <div class="field">
+      <label>Loja / equipe responsável *</label>
+      <select id="c_loja" required><option value="">Selecione</option></select>
+    </div>
+    <div class="field"><label>Nome do atleta *</label><input type="text" id="c_nome" required></div>
+    <div class="field"><label>CPF ou código do comprovante (GB-000000) *</label><input type="text" id="c_codigo" required></div>
+    <div class="field"><label>Marca / modelo da bike *</label><input type="text" id="c_bike" required></div>
+    <div class="field"><label>Número de série conferido *</label><input type="text" id="c_serie" required></div>
+
+    <div class="tab-row">
+      <div class="tab-btn active" data-tab="entrega" onclick="switchTab(this)">Entrega (recebimento)</div>
+      <div class="tab-btn" data-tab="devolucao" onclick="switchTab(this)">Devolução</div>
+    </div>
+
+    <div class="tab-panel active" id="tab-entrega">
+      <div class="section-head"><span class="section-num">02</span><span class="section-title">Conferência na entrega</span></div>
+      <div id="checklistEntrega"></div>
+      <div class="field" style="margin-top:16px;"><label>Avarias pré-existentes (se houver)</label><textarea id="c_avariasEntrega" placeholder="Descreva riscos, amassados ou marcas já existentes"></textarea></div>
+    </div>
+
+    <div class="tab-panel" id="tab-devolucao">
+      <div class="section-head"><span class="section-num">03</span><span class="section-title">Conferência na devolução</span></div>
+      <div id="checklistDevolucao"></div>
+      <div class="field" style="margin-top:16px;"><label>Novas avarias identificadas (se houver)</label><textarea id="c_avariasDevolucao" placeholder="Descreva qualquer dano novo encontrado"></textarea></div>
+    </div>
+
+    <div class="section-head"><span class="section-num">04</span><span class="section-title">Responsável</span></div>
+    <div class="field"><label>Nome de quem está conferindo *</label><input type="text" id="c_responsavel" required></div>
+
+    <div class="error-note" id="checklistError">Preencha os campos obrigatórios e marque os itens conferidos.</div>
+    <button type="submit" class="submit-btn" style="background:var(--safety);">Enviar checklist</button>
+  </form>
+</div>
+
+<!-- ============ LISTA DE BIKES ============ -->
+<div class="screen transit-bg" id="screen-bikes">
+  <div class="topbar dark">
+    <div class="brand-name" style="color:var(--paper-on-transit);">Bikes</div>
+  </div>
+  <div class="list-wrap">
+    <div class="list-search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" class="list-search" id="bikesSearch" placeholder="Buscar por atleta, marca ou nº de série">
+    </div>
+    <div id="bikesList">
+      <div class="skel-card"><div class="skel skel-avatar"></div><div class="skel-lines"><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div></div>
+      <div class="skel-card"><div class="skel skel-avatar"></div><div class="skel-lines"><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div></div>
+      <div class="skel-card"><div class="skel skel-avatar"></div><div class="skel-lines"><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DETALHES DA BIKE ============ -->
+<div class="screen transit-bg" id="screen-bike-detail">
+  <div class="topbar dark">
+    <button class="back-btn" onclick="showScreen('screen-bikes')">← Voltar</button>
+    <div class="brand-name" style="color:var(--paper-on-transit);">Detalhes</div>
+    <div style="width:70px;"></div>
+  </div>
+
+  <div class="detail-cover">
+    <div class="detail-cover-empty" id="bdCoverEmpty">🚲</div>
+    <img id="bdCoverImg" style="display:none;">
+  </div>
+
+  <div class="detail-hero">
+    <span class="status-badge" id="bdStatus">—</span>
+    <div class="detail-name" id="bdNome">—</div>
+    <div class="detail-sub" id="bdCliente">—</div>
+  </div>
+
+  <div class="detail-section-head"><span class="section-num">01</span><span class="section-title">Informações completas</span></div>
+  <div class="detail-grid">
+    <div class="detail-field"><div class="k">Cor</div><div class="v" id="bdCor">—</div></div>
+    <div class="detail-field"><div class="k">Grupo</div><div class="v" id="bdGrupo">—</div></div>
+    <div class="detail-field"><div class="k">Rodas</div><div class="v" id="bdRodas">—</div></div>
+    <div class="detail-field"><div class="k">Valor segurado</div><div class="v" id="bdValor">—</div></div>
+    <div class="detail-field" style="grid-column:1/-1;"><div class="k">Número de série</div><div class="v mono" id="bdSerie">—</div></div>
+  </div>
+
+  <div class="detail-section-head"><span class="section-num">02</span><span class="section-title">Acessos rápidos</span></div>
+  <div class="detail-actions">
+    <div class="dash-action" onclick="showScreen('screen-photos')">Fotos</div>
+    <div class="dash-action" onclick="openTimeline()">Linha do tempo</div>
+  </div>
+  <div class="detail-actions" style="padding-top:0;">
+    <div class="dash-action" onclick="openQrCode()" style="width:100%;">Ver QR Code</div>
+  </div>
+</div>
+
+<!-- ============ FOTOS DA BIKE ============ -->
+<div class="screen transit-bg" id="screen-photos">
+  <div class="topbar dark">
+    <button class="back-btn" onclick="showScreen('screen-bike-detail')">← Voltar</button>
+    <div class="brand-name" style="color:var(--paper-on-transit);">Fotos</div>
+    <div style="width:70px;"></div>
+  </div>
+  <div class="list-wrap" id="photosList"></div>
+</div>
+
+<!-- ============ LINHA DO TEMPO ============ -->
+<div class="screen transit-bg" id="screen-timeline">
+  <div class="topbar dark">
+    <button class="back-btn" onclick="showScreen('screen-bike-detail')">← Voltar</button>
+    <div class="brand-name" style="color:var(--paper-on-transit);">Linha do tempo</div>
+    <div style="width:70px;"></div>
+  </div>
+  <div class="list-wrap" style="padding-bottom:6px;">
+    <div class="eyebrow" style="color:var(--safety);">Progresso</div>
+    <div class="stage-track" id="stageTrack">
+      <div class="skel skel-line" style="width:100%; height:24px; margin-bottom:24px;"></div>
+      <div class="skel skel-line" style="width:100%; height:24px; margin-bottom:24px;"></div>
+      <div class="skel skel-line" style="width:100%; height:24px;"></div>
+    </div>
+  </div>
+  <div class="list-wrap" style="padding-top:8px;">
+    <div class="eyebrow" style="color:var(--safety); display:block; margin-bottom:14px;">Histórico detalhado</div>
+    <div id="timelineList">
+      <div class="skel-card"><div class="skel skel-avatar"></div><div class="skel-lines"><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EVENTOS ============ -->
+<div class="screen transit-bg" id="screen-eventos">
+  <div class="topbar dark">
+    <div class="brand-name" style="color:var(--paper-on-transit);">Eventos</div>
+  </div>
+  <div class="list-wrap" id="eventosList">
+    <div class="skel-card"><div class="skel skel-avatar"></div><div class="skel-lines"><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div></div>
+    <div class="skel-card"><div class="skel skel-avatar"></div><div class="skel-lines"><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div></div>
+  </div>
+</div>
+
+<!-- ============ MAIS ============ -->
+<div class="screen transit-bg" id="screen-mais">
+  <div class="topbar dark">
+    <div class="brand-name" style="color:var(--paper-on-transit);">Mais</div>
+  </div>
+  <div class="list-wrap">
+    <div class="profile-card">
+      <div class="profile-avatar" id="maisAvatar">—</div>
+      <div>
+        <div class="profile-name" id="maisNome">—</div>
+        <div class="profile-role" id="maisRole">—</div>
+      </div>
+    </div>
+    <div class="dash-actions" style="margin-top:24px;">
+      <div class="dash-action" onclick="showScreen('screen-relatorios')">Relatórios <span>→</span></div>
+      <div class="dash-action" onclick="showScreen('screen-checklist')">Fazer checklist <span>→</span></div>
+      <div class="dash-action" onclick="showScreen('screen-cadastro')">Novo cadastro de atleta <span>→</span></div>
+    </div>
+    <div class="dash-actions" style="margin-top:24px;">
+      <div class="dash-action" id="maisSair" style="color:#F56262;">Sair da conta</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BARRA DE NAVEGAÇÃO INFERIOR ============ -->
+<div class="bottom-nav" id="bottomNav" style="display:none;">
+  <a href="#" data-screen="screen-dashboard" onclick="navGo(event,'screen-dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+    Início
+  </a>
+  <a href="#" data-screen="screen-bikes" onclick="navGo(event,'screen-bikes')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="17" r="3.3"/><circle cx="18" cy="17" r="3.3"/><path d="M6 17L10 7.5H13.5L18 17M10 7.5L13 12.5"/></svg>
+    Bikes
+  </a>
+  <a href="#" data-screen="screen-checklist" onclick="navGo(event,'screen-checklist')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    Checklist
+  </a>
+  <a href="#" data-screen="screen-eventos" onclick="navGo(event,'screen-eventos')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Eventos
+  </a>
+  <a href="#" data-screen="screen-mais" onclick="navGo(event,'screen-mais')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
+    Perfil
+  </a>
+</div>
+
+<!-- ============ FAB: novo cadastro (flutua acima da nav) ============ -->
+<div class="fab-new" id="fabNew" onclick="showScreen('screen-cadastro')" style="display:none;">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</div>
+
+<!-- ============ QR CODE ============ -->
+<div class="screen transit-bg" id="screen-qrcode">
+  <div class="topbar dark">
+    <button class="back-btn" onclick="showScreen('screen-bike-detail')">← Voltar</button>
+    <div class="brand-name" style="color:var(--paper-on-transit);">QR Code</div>
+    <div style="width:70px;"></div>
+  </div>
+  <div class="qr-wrap">
+    <div class="qr-card" id="qrCanvas"></div>
+    <div class="qr-bike-name" id="qrBikeName">—</div>
+    <div class="qr-bike-sub" id="qrBikeSerie">—</div>
+    <p class="qr-hint">Ao escanear, abre direto o cadastro, fotos, checklist, status e histórico dessa bike. Cole esse código numa etiqueta física presa à bicicleta.</p>
+  </div>
+</div>
+
+<!-- ============ RELATÓRIOS ============ -->
+<div class="screen transit-bg" id="screen-relatorios">
+  <div class="topbar dark">
+    <button class="back-btn" onclick="showScreen('screen-mais')">← Voltar</button>
+    <div class="brand-name" style="color:var(--paper-on-transit);">Relatórios</div>
+    <div style="width:70px;"></div>
+  </div>
+  <div class="list-wrap">
+    <div class="report-summary">
+      <div class="report-card"><div class="num" id="repTotalBikes">0</div><div class="lbl">Total de bikes</div></div>
+      <div class="report-card"><div class="num" id="repValorSegurado">R$ 0</div><div class="lbl">Valor segurado</div></div>
+    </div>
+
+    <div class="report-section">
+      <h3>Bikes por status</h3>
+      <div class="chart-box"><canvas id="chartStatus"></canvas></div>
+    </div>
+
+    <div class="report-section">
+      <h3>Bikes por evento</h3>
+      <div class="chart-box"><canvas id="chartEventos"></canvas></div>
+    </div>
+
+    <div class="report-section">
+      <h3>Clientes recorrentes (2+ bikes)</h3>
+      <div id="recorrentesList">
+        <div class="skel-card"><div class="skel skel-avatar"></div><div class="skel-lines"><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-  // ======= EDITE AQUI OS SERVIÇOS/LINKS =======
-  const services = [
-    {
-      label: "Portfólio",
-      url: "https://wa.me/5522992286480",
-      icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`
-    },
-    {
-      label: "Catálogo",
-      url: "https://wa.me/5522992286480",
-      icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`
-    },
-    {
-      label: "Landing Pages",
-      url: "https://wa.me/5522992286480",
-      icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>`
-    },
-    {
-      label: "Sites Profissionais",
-      url: "https://wa.me/5522992286480",
-      icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`
-    },
-    {
-      label: "BioSites",
-      url: "https://wa.me/5522992286480",
-      icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`
-    },
-    {
-      label: "Chatbots",
-      url: "https://wa.me/5522992286480",
-      icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>`
-    },
-    {
-      label: "Google Meu Negócio",
-      url: "https://wa.me/5522992286480",
-      icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
-      full: true
-    }
-  ];
-  // ==============================================
+  // ================= SUPABASE =================
+  const SUPABASE_URL = 'https://bqqklcmpzfqmsabpsiuw.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_pI3kI3geLBeINOg2L1rRxg_rIHSl1QW';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const grid = document.getElementById('grid');
-  services.forEach((s) => {
-    const a = document.createElement('a');
-    a.href = s.url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.className = 'grid-item panel' + (s.full ? ' full' : '');
-    a.innerHTML = `<div class="grid-icon">${s.icon}</div><div class="grid-label">${s.label}</div>`;
-    grid.appendChild(a);
+  // ================= SKELETON LOADING =================
+  function skeletonList(n){
+    n = n || 3;
+    let html = '';
+    for (let i = 0; i < n; i++){
+      html += `<div class="skel-card">
+        <div class="skel skel-avatar"></div>
+        <div class="skel-lines">
+          <div class="skel skel-line w60"></div>
+          <div class="skel skel-line w40"></div>
+        </div>
+      </div>`;
+    }
+    return html;
+  }
+  function vibrate(ms){
+    if (navigator.vibrate) navigator.vibrate(ms);
+  }
+  function showToast(message, type){
+    type = type || 'success';
+    vibrate(type === 'error' ? [30, 40, 30] : 18);
+    const wrap = document.getElementById('toastWrap');
+    const el = document.createElement('div');
+    el.className = 'toast' + (type === 'error' ? ' error' : '');
+    const icon = type === 'error'
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+    el.innerHTML = `<div class="toast-icon">${icon}</div><div>${message}</div>`;
+    wrap.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('hide');
+      setTimeout(() => el.remove(), 300);
+    }, 2600);
+  }
+
+  // ================= LIGHTBOX (galeria em tela cheia) =================
+  let lightboxPhotos = [];
+  let lightboxIndex = 0;
+
+  function openLightbox(photos, startIndex){
+    lightboxPhotos = photos.filter(p => p.url);
+    if (!lightboxPhotos.length) return;
+    lightboxIndex = Math.max(0, lightboxPhotos.findIndex((p, i) => i === startIndex));
+    renderLightbox();
+    document.getElementById('lightbox').classList.add('show');
+  }
+  function closeLightbox(){
+    document.getElementById('lightbox').classList.remove('show');
+  }
+  function lightboxNav(dir){
+    lightboxIndex = (lightboxIndex + dir + lightboxPhotos.length) % lightboxPhotos.length;
+    renderLightbox();
+  }
+  function renderLightbox(){
+    const photo = lightboxPhotos[lightboxIndex];
+    const img = document.getElementById('lightboxImg');
+    img.src = photo.url;
+    img.style.transform = 'scale(1)';
+    img.dataset.zoomed = '0';
+    document.getElementById('lightboxCaption').textContent = photo.label || '';
+    document.getElementById('lightboxDots').innerHTML = lightboxPhotos.map((_, i) =>
+      `<div class="lightbox-dot ${i === lightboxIndex ? 'active' : ''}"></div>`
+    ).join('');
+  }
+  // Duplo toque na imagem: zoom in/out
+  document.addEventListener('DOMContentLoaded', () => {
+    const img = document.getElementById('lightboxImg');
+    if (!img) return;
+    img.addEventListener('dblclick', () => {
+      const zoomed = img.dataset.zoomed === '1';
+      img.style.transform = zoomed ? 'scale(1)' : 'scale(2)';
+      img.dataset.zoomed = zoomed ? '0' : '1';
+    });
+    // Swipe simples (touch) para navegar entre fotos
+    let touchStartX = 0;
+    const stage = document.getElementById('lightboxStage');
+    stage.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+    stage.addEventListener('touchend', e => {
+      const diff = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(diff) > 50) lightboxNav(diff > 0 ? -1 : 1);
+    });
   });
 
-  // Scroll reveal
-  const revealEls = document.querySelectorAll('.reveal');
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        io.unobserve(entry.target);
+  let currentProfile = null;
+
+  // ================= LOGIN =================
+  document.getElementById('formLogin').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const senha = document.getElementById('login-senha').value;
+    const btn = document.getElementById('loginBtn');
+    const errEl = document.getElementById('loginError');
+    errEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+
+    if (error) {
+      errEl.textContent = 'E-mail ou senha incorretos.';
+      errEl.style.display = 'block';
+      return;
+    }
+    await afterLogin();
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    currentProfile = null;
+    showScreen('screen-login');
+  });
+
+  async function afterLogin(){
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) { showScreen('screen-login'); return; }
+
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('nome, role')
+      .eq('id', user.id)
+      .single();
+
+    currentProfile = profile || { nome: user.email, role: 'funcionario' };
+    updateHeaderGreeting();
+
+    await loadDashboardStats();
+    showScreen('screen-dashboard');
+    checkDeepLink();
+  }
+
+  // Saudação personalizada + data no topo do dashboard
+  function updateHeaderGreeting(){
+    const greetingEl = document.getElementById('headerGreeting');
+    const dateEl = document.getElementById('headerDate');
+    if (!greetingEl) return;
+    const hora = new Date().getHours();
+    const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+    const primeiroNome = currentProfile ? currentProfile.nome.split(' ')[0] : '';
+    greetingEl.innerHTML = primeiroNome ? `${saudacao}, <b>${primeiroNome}</b>!` : `${saudacao}!`;
+    if (dateEl){
+      const hoje = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+      dateEl.textContent = hoje.charAt(0).toUpperCase() + hoje.slice(1);
+    }
+  }
+
+  let dashMiniChartInstance = null;
+  async function loadDashboardStats(){
+    const { count: emTransporte } = await sb.from('bikes').select('*', { count: 'exact', head: true }).eq('status', 'em_transporte');
+    const { count: entregue } = await sb.from('bikes').select('*', { count: 'exact', head: true }).eq('status', 'entregue');
+    const { count: aguardando } = await sb.from('bikes').select('*', { count: 'exact', head: true }).eq('status', 'aguardando');
+    const { count: problema } = await sb.from('bikes').select('*', { count: 'exact', head: true }).eq('status', 'problema');
+
+    document.getElementById('statTransporte').textContent = emTransporte ?? 0;
+    document.getElementById('statEntregue').textContent = entregue ?? 0;
+    document.getElementById('statAguardando').textContent = aguardando ?? 0;
+    document.getElementById('statChecklist').textContent = aguardando ?? 0;
+
+    renderDashMiniChart(emTransporte ?? 0, entregue ?? 0, aguardando ?? 0, problema ?? 0);
+    loadProximosEventos();
+  }
+
+  // Gráfico compacto de status na dashboard — complementa os cards sem poluir a tela
+  function renderDashMiniChart(transporte, entregues, aguardando, problema){
+    const canvas = document.getElementById('dashMiniChart');
+    if (!canvas) return;
+    const total = transporte + entregues + aguardando + problema;
+    if (dashMiniChartInstance) dashMiniChartInstance.destroy();
+    if (!total){
+      canvas.parentElement.innerHTML = '<div class="list-empty" style="padding:0;">Sem bikes cadastradas ainda pra exibir no gráfico.</div>';
+      return;
+    }
+    const labels = ['Em transporte', 'Entregues', 'Aguardando'];
+    const data = [transporte, entregues, aguardando];
+    const colors = ['#E8AC1F', '#4ADE80', '#7691a0'];
+    if (problema > 0){ labels.push('Em manutenção'); data.push(problema); colors.push('#F56262'); }
+
+    dashMiniChartInstance = new Chart(canvas.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+      options: {
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+          legend: { position: 'right', labels: { color: '#9FB6C1', boxWidth: 10, font: { size: 10.5 }, padding: 10 } }
+        }
       }
     });
-  }, { threshold: 0.15 });
-  revealEls.forEach(el => io.observe(el));
+  }
 
-  // Back to top
-  const toTop = document.getElementById('toTop');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 500) toTop.classList.add('show');
-    else toTop.classList.remove('show');
+  // Mostra os próximos eventos futuros no dashboard
+  async function loadProximosEventos(){
+    const el = document.getElementById('dashProximosEventos');
+    if (!el) return;
+    const hoje = new Date().toISOString().slice(0, 10);
+    const { data } = await sb
+      .from('eventos')
+      .select('id, nome, data')
+      .gte('data', hoje)
+      .order('data', { ascending: true })
+      .limit(3);
+
+    if (!data || !data.length){
+      el.innerHTML = '<div class="list-empty" style="padding:18px 0;">Nenhum evento futuro cadastrado.</div>';
+      return;
+    }
+
+    el.innerHTML = data.map(ev => {
+      const d = ev.data ? new Date(ev.data + 'T00:00:00') : null;
+      const dia = d ? d.getDate() : '—';
+      const mes = d ? d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase() : '';
+      return `
+        <div class="dash-event-card" onclick="showScreen('screen-eventos')">
+          <div class="dash-event-date"><span>${dia}</span><small>${mes}</small></div>
+          <div class="dash-event-name">${ev.nome}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Busca rápida no dashboard (nome, CPF, série, evento)
+  let searchTimeout;
+  document.getElementById('dashSearch').addEventListener('input', function(){
+    clearTimeout(searchTimeout);
+    const termo = this.value.trim();
+    const resultsEl = document.getElementById('dashSearchResults');
+    if (termo.length < 2) { resultsEl.innerHTML = ''; return; }
+    searchTimeout = setTimeout(async () => {
+      const { data } = await sb
+        .from('clientes')
+        .select('nome, cpf, id')
+        .or(`nome.ilike.%${termo}%,cpf.ilike.%${termo}%`)
+        .limit(5);
+      resultsEl.innerHTML = (data || []).map(c =>
+        `<div class="dash-action" style="margin-top:10px;">${c.nome} <span style="color:#9FB6C1;font-size:11px;">${c.cpf || ''}</span></div>`
+      ).join('');
+    }, 400);
+  });
+
+  // Ao carregar a página: mostra a splash por um tempo mínimo elegante, depois verifica sessão
+  (async function initAuth(){
+    document.getElementById('screen-login').classList.remove('active');
+    const splashEl = document.getElementById('screen-loading');
+    splashEl.classList.add('show');
+    const start = Date.now();
+
+    const { data: { session } } = await sb.auth.getSession();
+
+    const elapsed = Date.now() - start;
+    const minDuration = 1200; // splash visível por pelo menos ~1.2s
+    if (elapsed < minDuration) await new Promise(r => setTimeout(r, minDuration - elapsed));
+
+    splashEl.classList.add('hide');
+    setTimeout(() => { splashEl.classList.remove('show', 'hide'); }, 400);
+
+    if (session) {
+      await afterLogin();
+    } else {
+      showScreen('screen-login');
+    }
+  })();
+
+  // ================= PWA: registra o service worker =================
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+
+  // ================= DADOS =================
+  const eventos = [
+    "Ironman 70.3 Curitiba","Ironman 70.3 Brasília","Ironman Pleno Florianópolis","Ironman 70.3 Aracaju",
+    "Ironman 70.3 São Paulo","Ironman 70.3 Rio de Janeiro","Ironman 70.3 Florianópolis","Letape Serra Negra",
+    "Letape Campos do Jordão","GFNY - Bento","UCI Timbó","Desafio Florianópolis Abril","Desafio Florianópolis Novembro",
+    "Tritão Salvador","Triton Porto Belo","Outro (especificar)"
+  ];
+  const lojas = [
+    "S2 Bike Shop Brasília - Asa Sul, Brasília - DF","TopBike Brasil - St. Bueno, Goiânia - GO",
+    "Multibike Specialized - Alto da Boa Vista, Ribeirão Preto - SP","Flash Bike - Bonfim, Campinas - SP",
+    "S2 Bike Shop Alphaville SP - Barueri - SP","Bike Service SP - Brooklin, São Paulo - SP",
+    "Bike for Life - Indianópolis, São Paulo - SP","S2 Bike Shop Jardins - São Paulo - SP",
+    "Tutto Bike - Pompeia, São Paulo - SP","Oversports - São Caetano do Sul - SP",
+    "Scatt Bike Tatuapé - São Paulo - SP","Bike North - Santana, São Paulo - SP",
+    "Barcellos Sports - Icaraí, Niterói - RJ","Barcellos Ipanema - Rio de Janeiro - RJ",
+    "Genésio Bike Fit - Ipanema, Rio de Janeiro - RJ","BR Cycling - Barra da Tijuca, Rio de Janeiro - RJ",
+    "Cabral Bike Shop - Centro, Lorena - SP","Bike Garden Mechanics and Shop - Porto Alegre - RS",
+    "BH Bike Store Trek - Estoril, Belo Horizonte - MG"
+  ];
+  // Itens de checklist organizados por categoria — CONFIRME com o cliente antes de usar em produção,
+  // pois o formulário original não especificava os itens de inspeção.
+  const CHECKLIST_CATEGORIAS = [
+    { nome: 'Documentação', itens: [
+      'Fotos gerais da bike tiradas (todos os ângulos)',
+      'Número de série conferido e confere com o cadastro'
+    ]},
+    { nome: 'Quadro', itens: [
+      'Parafusos e componentes bem fixados'
+    ]},
+    { nome: 'Rodas', itens: [
+      'Pneus calibrados e sem furos aparentes',
+      'Rodas alinhadas, sem empenamento visível'
+    ]},
+    { nome: 'Freios', itens: [
+      'Freios (dianteiro e traseiro) funcionando'
+    ]},
+    { nome: 'Transmissão', itens: [
+      'Câmbio dianteiro e traseiro funcionando'
+    ]},
+    { nome: 'Cockpit', itens: [
+      'Selim e guidão firmes, sem folga'
+    ]},
+    { nome: 'Acessórios', itens: [
+      'Bike embalada/protegida adequadamente para transporte',
+      'Mochila de equipamentos conferida (se aplicável)'
+    ]}
+  ];
+  // Lista plana (mantida para compatibilidade com contagens e resumo do WhatsApp)
+  const itensChecklist = CHECKLIST_CATEGORIAS.flatMap(cat => cat.itens);
+
+  // ================= NAVEGAÇÃO =================
+  const NAV_SCREENS = ['screen-dashboard','screen-bikes','screen-bike-detail','screen-photos','screen-timeline','screen-eventos','screen-mais','screen-qrcode','screen-relatorios','screen-checklist','screen-cadastro'];
+  const FAB_SCREENS = ['screen-dashboard','screen-bikes','screen-eventos','screen-mais'];
+
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+
+    const bottomNav = document.getElementById('bottomNav');
+    const fab = document.getElementById('fabNew');
+    if (NAV_SCREENS.includes(id)) {
+      bottomNav.style.display = 'flex';
+      document.body.classList.add('has-nav');
+      const bikesGroup = ['screen-bike-detail','screen-photos','screen-timeline','screen-qrcode'];
+      const maisGroup = ['screen-relatorios'];
+      document.querySelectorAll('.bottom-nav a').forEach(a => {
+        const isActive = a.dataset.screen === id ||
+          (bikesGroup.includes(id) && a.dataset.screen === 'screen-bikes') ||
+          (maisGroup.includes(id) && a.dataset.screen === 'screen-mais');
+        a.classList.toggle('active', isActive);
+      });
+      fab.style.display = FAB_SCREENS.includes(id) ? 'flex' : 'none';
+    } else {
+      bottomNav.style.display = 'none';
+      fab.style.display = 'none';
+      document.body.classList.remove('has-nav');
+    }
+
+    if (id === 'screen-bikes') loadBikesList();
+    if (id === 'screen-eventos') loadEventosList();
+    if (id === 'screen-mais') loadMaisScreen();
+    if (id === 'screen-relatorios') loadRelatorios();
+  }
+
+  function navGo(e, id){
+    e.preventDefault();
+    showScreen(id);
+  }
+
+  // ================= LISTA DE BIKES =================
+  let currentBikeId = null;
+  let currentBikeFotos = [];
+  let todasAsBikes = [];
+
+  function statusLabel(s){
+    return { entregue:'Entregue', em_transporte:'Em transporte', aguardando:'Aguardando', problema:'Problema', cancelada:'Cancelada' }[s] || s;
+  }
+
+  async function loadBikesList(){
+    document.getElementById('bikesList').innerHTML = skeletonList(3);
+    const { data, error } = await sb
+      .from('bikes')
+      .select('id, marca, modelo, numero_serie, status, cliente_id, clientes(nome)')
+      .order('created_at', { ascending: false })
+      .limit(100);
+    todasAsBikes = data || [];
+    renderBikesList(todasAsBikes);
+  }
+
+  function renderBikesList(bikes){
+    const el = document.getElementById('bikesList');
+    if (!bikes.length){ el.innerHTML = '<div class="list-empty">Nenhuma bike cadastrada ainda.</div>'; return; }
+    el.innerHTML = bikes.map((b, i) => `
+      <div class="list-item stagger-in" style="animation-delay:${i * 35}ms" onclick="openBikeDetail('${b.id}')">
+        <div class="list-item-main">
+          <div class="list-item-title">${b.marca || ''} ${b.modelo || ''}</div>
+          <div class="list-item-sub">${(b.clientes && b.clientes.nome) || 'Sem atleta'} · ${b.numero_serie || 's/ série'}</div>
+        </div>
+        <span class="status-badge status-${b.status}">${statusLabel(b.status)}</span>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('bikesSearch').addEventListener('input', function(){
+    const termo = this.value.toLowerCase();
+    renderBikesList(todasAsBikes.filter(b =>
+      (b.marca||'').toLowerCase().includes(termo) ||
+      (b.modelo||'').toLowerCase().includes(termo) ||
+      (b.numero_serie||'').toLowerCase().includes(termo) ||
+      ((b.clientes && b.clientes.nome)||'').toLowerCase().includes(termo)
+    ));
+  });
+
+  // ================= DETALHES DA BIKE =================
+  async function openBikeDetail(bikeId){
+    currentBikeId = bikeId;
+    const { data: bike } = await sb
+      .from('bikes')
+      .select('*, clientes(nome, telefone)')
+      .eq('id', bikeId)
+      .single();
+    if (!bike) return;
+
+    document.getElementById('bdStatus').textContent = statusLabel(bike.status);
+    document.getElementById('bdStatus').className = 'status-badge status-' + bike.status;
+    document.getElementById('bdNome').textContent = `${bike.marca || ''} ${bike.modelo || ''}`;
+    document.getElementById('bdCliente').textContent = (bike.clientes && bike.clientes.nome) || 'Sem atleta vinculado';
+    document.getElementById('bdCor').textContent = bike.cor || '—';
+    document.getElementById('bdGrupo').textContent = bike.grupo || '—';
+    document.getElementById('bdRodas').textContent = bike.rodas || '—';
+    document.getElementById('bdValor').textContent = bike.valor ? `R$ ${Number(bike.valor).toLocaleString('pt-BR')}` : '—';
+    document.getElementById('bdSerie').textContent = bike.numero_serie || '—';
+
+    const coverImg = document.getElementById('bdCoverImg');
+    const coverEmpty = document.getElementById('bdCoverEmpty');
+    if (bike.foto_frente_url){
+      coverImg.src = bike.foto_frente_url;
+      coverImg.style.display = 'block';
+      coverEmpty.style.display = 'none';
+    } else {
+      coverImg.style.display = 'none';
+      coverEmpty.style.display = 'flex';
+    }
+
+    const fotos = [
+      { label: 'Frente', url: bike.foto_frente_url },
+      { label: 'Traseira', url: bike.foto_traseira_url },
+      { label: 'Lado direito', url: bike.foto_lado_direito_url },
+      { label: 'Lado esquerdo', url: bike.foto_lado_esquerdo_url },
+      { label: 'Número de série', url: bike.foto_numero_serie_url }
+    ];
+    currentBikeFotos = fotos;
+    document.getElementById('photosList').innerHTML =
+      '<div class="gallery-grid">' +
+      fotos.map((f, i) => `
+        <div class="gallery-card" ${f.url ? `onclick="openLightbox(currentBikeFotos, ${i})"` : ''}>
+          ${f.url ? `<img src="${f.url}" loading="lazy">` : '<div class="gallery-card-empty">📷</div>'}
+          <div class="gallery-label">${f.label}</div>
+        </div>
+      `).join('') +
+      '</div><p class="hint" style="margin-top:16px; color:#7691a0;">Upload de fotos ainda não conectado — próxima etapa. Toque numa foto existente pra abrir em tela cheia.</p>';
+
+    showScreen('screen-bike-detail');
+  }
+
+  // Etapas visuais do transporte da bike, na ordem em que acontecem na prática
+  const STAGE_LABELS = ['Cadastro', 'Recebida', 'Checklist', 'Em Transporte', 'Evento', 'Retorno', 'Entregue'];
+  const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+
+  function renderStageTrack(doneUpTo){
+    const el = document.getElementById('stageTrack');
+    el.innerHTML = STAGE_LABELS.map((label, i) => {
+      let cls = 'pending';
+      if (i <= doneUpTo) cls = 'done';
+      else if (i === doneUpTo + 1) cls = 'current';
+      return `
+        <div class="stage-item ${cls}">
+          <div class="stage-dot">${cls === 'done' ? CHECK_ICON : ''}</div>
+          <div class="stage-label">${label}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function openTimeline(){
+    const el = document.getElementById('timelineList');
+    el.innerHTML = skeletonList(2);
+    document.getElementById('stageTrack').innerHTML = '<div class="skel skel-line" style="width:100%; height:24px; margin-bottom:24px;"></div><div class="skel skel-line" style="width:100%; height:24px;"></div>';
+    showScreen('screen-timeline');
+
+    const [{ data: bike }, { data }] = await Promise.all([
+      sb.from('bikes').select('status').eq('id', currentBikeId).single(),
+      sb.from('timeline').select('etapa, usuario, created_at').eq('bike_id', currentBikeId).order('created_at', { ascending: true })
+    ]);
+
+    // Infere o progresso a partir dos registros de timeline + status atual da bike
+    const entregaDone = (data || []).some(t => (t.etapa || '').toLowerCase().includes('entrega'));
+    const devolucaoDone = (data || []).some(t => (t.etapa || '').toLowerCase().includes('devolu'));
+    let doneUpTo = 0; // Cadastro: sempre concluído, já que a bike existe
+    if (entregaDone) doneUpTo = 2; // Recebida + Checklist de entrega
+    if (bike && bike.status === 'em_transporte') doneUpTo = Math.max(doneUpTo, 3);
+    if (devolucaoDone) doneUpTo = Math.max(doneUpTo, 5); // Retorno (Evento fica implícito)
+    if (bike && bike.status === 'entregue') doneUpTo = 6;
+    renderStageTrack(doneUpTo);
+
+    if (!data || !data.length){ el.innerHTML = '<div class="list-empty">Nenhum evento registrado ainda para essa bike.</div>'; return; }
+
+    el.innerHTML = data.map(t => `
+      <div class="tl-item">
+        <div class="tl-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="tl-content">
+          <div class="tl-etapa">${t.etapa}</div>
+          <div class="tl-meta">${t.usuario || ''} · ${new Date(t.created_at).toLocaleString('pt-BR')}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ================= EVENTOS =================
+  async function loadEventosList(){
+    const el = document.getElementById('eventosList');
+    el.innerHTML = skeletonList(2);
+    const { data } = await sb.from('eventos').select('id, nome, data').order('data', { ascending: true });
+    if (!data || !data.length){ el.innerHTML = '<div class="list-empty">Nenhum evento cadastrado ainda.</div>'; return; }
+    el.innerHTML = data.map(ev => `
+      <div class="list-item" style="cursor:default;">
+        <div class="list-item-main">
+          <div class="list-item-title">${ev.nome}</div>
+          <div class="list-item-sub">${ev.data ? new Date(ev.data).toLocaleDateString('pt-BR') : 'Data a definir'}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ================= MAIS (menu) =================
+  function loadMaisScreen(){
+    const nome = currentProfile ? currentProfile.nome : '—';
+    const role = currentProfile ? currentProfile.role : '';
+    document.getElementById('maisNome').textContent = nome;
+    document.getElementById('maisRole').textContent = role;
+    const iniciais = currentProfile
+      ? currentProfile.nome.split(' ').filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('')
+      : '—';
+    document.getElementById('maisAvatar').textContent = iniciais;
+  }
+  document.getElementById('maisSair').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    currentProfile = null;
+    showScreen('screen-login');
+  });
+
+  // ================= QR CODE =================
+  async function openQrCode(){
+    const { data: bike } = await sb.from('bikes').select('marca, modelo, numero_serie').eq('id', currentBikeId).single();
+    document.getElementById('qrBikeName').textContent = bike ? `${bike.marca || ''} ${bike.modelo || ''}` : '—';
+    document.getElementById('qrBikeSerie').textContent = bike ? (bike.numero_serie || '') : '';
+
+    const qrEl = document.getElementById('qrCanvas');
+    qrEl.innerHTML = '';
+    const url = `${location.origin}${location.pathname}?bike=${currentBikeId}`;
+    new QRCode(qrEl, { text: url, width: 200, height: 200, colorDark: '#0a0a0a', colorLight: '#ffffff' });
+
+    showScreen('screen-qrcode');
+  }
+
+  // ================= RELATÓRIOS =================
+  let chartStatusInstance = null;
+  let chartEventosInstance = null;
+
+  async function loadRelatorios(){
+    const { data: bikes } = await sb.from('bikes').select('status, valor, cliente_id');
+    const { data: cadastros } = await sb.from('cadastros').select('evento_id, eventos(nome)');
+
+    const total = bikes ? bikes.length : 0;
+    const valorTotal = (bikes || []).reduce((s, b) => s + (Number(b.valor) || 0), 0);
+    document.getElementById('repTotalBikes').textContent = total;
+    document.getElementById('repValorSegurado').textContent = 'R$ ' + valorTotal.toLocaleString('pt-BR');
+
+    // --- gráfico de status ---
+    const statusCount = { entregue:0, em_transporte:0, aguardando:0, problema:0, cancelada:0 };
+    (bikes||[]).forEach(b => { if (statusCount[b.status] !== undefined) statusCount[b.status]++; });
+
+    const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+    if (chartStatusInstance) chartStatusInstance.destroy();
+    chartStatusInstance = new Chart(ctxStatus, {
+      type: 'doughnut',
+      data: {
+        labels: ['Entregue','Em transporte','Aguardando','Problema','Cancelada'],
+        datasets: [{ data: Object.values(statusCount), backgroundColor: ['#4ADE80','#5EA8E8','#F5C242','#F56262','#666'] }]
+      },
+      options: { plugins: { legend: { labels: { color: '#EAF1F3', font: { size: 10 } } } }, maintainAspectRatio: false }
+    });
+
+    // --- gráfico por evento ---
+    const porEvento = {};
+    (cadastros||[]).forEach(c => {
+      const nome = (c.eventos && c.eventos.nome) || 'Sem evento';
+      porEvento[nome] = (porEvento[nome] || 0) + 1;
+    });
+    const ctxEventos = document.getElementById('chartEventos').getContext('2d');
+    if (chartEventosInstance) chartEventosInstance.destroy();
+    chartEventosInstance = new Chart(ctxEventos, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(porEvento),
+        datasets: [{ data: Object.values(porEvento), backgroundColor: '#E8AC1F', borderRadius: 6 }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#9FB6C1', font: { size: 9 } }, grid: { color: '#23495C' } },
+          y: { ticks: { color: '#9FB6C1' }, grid: { color: '#23495C' } }
+        },
+        maintainAspectRatio: false
+      }
+    });
+
+    // --- clientes recorrentes ---
+    const porCliente = {};
+    (bikes||[]).forEach(b => { if (b.cliente_id) porCliente[b.cliente_id] = (porCliente[b.cliente_id] || 0) + 1; });
+    const recorrentesIds = Object.entries(porCliente).filter(([id,count]) => count >= 2);
+
+    const recEl = document.getElementById('recorrentesList');
+    if (!recorrentesIds.length){ recEl.innerHTML = '<div class="list-empty">Nenhum cliente com mais de uma bike ainda.</div>'; return; }
+
+    const { data: clientesData } = await sb.from('clientes').select('id, nome').in('id', recorrentesIds.map(r => r[0]));
+    recEl.innerHTML = recorrentesIds.map(([id, count]) => {
+      const cliente = (clientesData||[]).find(c => c.id === id);
+      return `<div class="recorrente-item"><span>${cliente ? cliente.nome : id}</span><b>${count} bikes</b></div>`;
+    }).join('');
+  }
+
+  // ================= DEEP LINK (QR Code escaneado) =================
+  function checkDeepLink(){
+    const params = new URLSearchParams(location.search);
+    const bikeId = params.get('bike');
+    if (bikeId) openBikeDetail(bikeId);
+  }
+
+  function selectRadio(el){
+    const group = el.dataset.group;
+    document.querySelectorAll(`.radio-opt[data-group="${group}"]`).forEach(o => o.classList.remove('sel'));
+    el.classList.add('sel');
+  }
+
+  function switchTab(el){
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + el.dataset.tab).classList.add('active');
+  }
+
+  // ================= POPULAR SELECTS =================
+  function populateSelect(id, arr){
+    const sel = document.getElementById(id);
+    arr.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      sel.appendChild(opt);
+    });
+  }
+  populateSelect('f_evento', eventos);
+  populateSelect('f_loja', lojas);
+  populateSelect('c_loja', lojas);
+
+  document.getElementById('f_evento').addEventListener('change', (e) => {
+    document.getElementById('wrap_outroEvento').style.display = e.target.value === "Outro (especificar)" ? 'block' : 'none';
+  });
+
+  function renderChecklist(containerId, prefix){
+    const c = document.getElementById(containerId);
+    let i = 0;
+    CHECKLIST_CATEGORIAS.forEach(categoria => {
+      const catHead = document.createElement('div');
+      catHead.className = 'checklist-cat-head';
+      catHead.textContent = categoria.nome;
+      c.appendChild(catHead);
+      categoria.itens.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'stamp-item';
+        div.dataset.key = prefix + '_' + i;
+        div.dataset.categoria = categoria.nome;
+        div.innerHTML = `<div class="stamp-box">OK</div><div class="stamp-label">${item}</div>`;
+        div.addEventListener('click', () => div.classList.toggle('checked'));
+        c.appendChild(div);
+        i++;
+      });
+    });
+  }
+  renderChecklist('checklistEntrega', 'entrega');
+  renderChecklist('checklistDevolucao', 'devolucao');
+
+  // ================= WHATSAPP CONFIG =================
+  // TROQUE pelo número real da Gerna Bikes (com DDI 55 + DDD, sem espaços/traços)
+  const GERNA_WHATSAPP = "5500000000000";
+
+  // ================= CADASTRO: SUBMIT =================
+  let ultimoCadastro = null;
+
+  document.getElementById('formCadastro').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const required = this.querySelectorAll('[required]');
+    let ok = true;
+    required.forEach(f => { if(!f.value && f.type !== 'checkbox') ok = false; if(f.type==='checkbox' && !f.checked) ok = false; });
+    const mochila = document.querySelector('.radio-opt[data-group="mochila"].sel');
+    if(!mochila) ok = false;
+
+    if(!ok){
+      document.getElementById('cadastroError').style.display = 'block';
+      return;
+    }
+    document.getElementById('cadastroError').style.display = 'none';
+
+    const submitBtn = this.querySelector('.submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Salvando...';
+
+    const evento = document.getElementById('f_evento').value === "Outro (especificar)"
+      ? document.getElementById('f_outroEvento').value
+      : document.getElementById('f_evento').value;
+
+    const code = 'GB-' + Math.floor(100000 + Math.random()*900000);
+
+    ultimoCadastro = {
+      code, evento,
+      nome: document.getElementById('f_nome').value,
+      email: document.getElementById('f_email').value,
+      telefone: document.getElementById('f_telefone').value,
+      cpf: document.getElementById('f_cpf').value,
+      nascimento: document.getElementById('f_nascimento').value || null,
+      equipe: document.getElementById('f_equipe').value,
+      instagram: document.getElementById('f_instagram').value,
+      endereco: document.getElementById('f_endereco').value,
+      cep: document.getElementById('f_cep').value,
+      cidade: document.getElementById('f_cidade').value,
+      marca: document.getElementById('f_marca').value,
+      modelo: document.getElementById('f_modelo').value,
+      grupo: document.getElementById('f_grupo').value,
+      cor: document.getElementById('f_cor').value,
+      roda: document.getElementById('f_roda').value,
+      serie: document.getElementById('f_serie').value,
+      valor: document.getElementById('f_valor').value,
+      mochila: mochila.dataset.value,
+      loja: document.getElementById('f_loja').value,
+      infoExtra: document.getElementById('f_infoExtra').value,
+      sugestoes: document.getElementById('f_sugestoes').value
+    };
+
+    try {
+      // 1) Salva/atualiza o cliente (usando CPF como identificador único)
+      const { data: cliente, error: erroCliente } = await sb
+        .from('clientes')
+        .upsert({
+          nome: ultimoCadastro.nome,
+          email: ultimoCadastro.email,
+          telefone: ultimoCadastro.telefone,
+          cpf: ultimoCadastro.cpf,
+          data_nascimento: ultimoCadastro.nascimento,
+          equipe: ultimoCadastro.equipe,
+          instagram: ultimoCadastro.instagram,
+          endereco: ultimoCadastro.endereco,
+          cep: ultimoCadastro.cep,
+          cidade: ultimoCadastro.cidade,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'cpf' })
+        .select()
+        .single();
+      if (erroCliente) throw erroCliente;
+
+      // 2) Salva a bike vinculada ao cliente
+      const { data: bike, error: erroBike } = await sb
+        .from('bikes')
+        .insert({
+          cliente_id: cliente.id,
+          marca: ultimoCadastro.marca,
+          modelo: ultimoCadastro.modelo,
+          cor: ultimoCadastro.cor,
+          grupo: ultimoCadastro.grupo,
+          rodas: ultimoCadastro.roda,
+          valor: parseFloat((ultimoCadastro.valor || '0').replace(/[^\d,.-]/g,'').replace(',','.')) || null,
+          numero_serie: ultimoCadastro.serie,
+          status: 'aguardando'
+        })
+        .select()
+        .single();
+      if (erroBike) throw erroBike;
+
+      // 3) Encontra (ou ignora) evento e loja pelo nome
+      const { data: eventoRow } = await sb.from('eventos').select('id').eq('nome', evento).maybeSingle();
+      const { data: lojaRow } = await sb.from('lojas').select('id').eq('nome', ultimoCadastro.loja).maybeSingle();
+
+      // 4) Cria o cadastro (o "manifesto" que liga tudo)
+      const { error: erroCadastro } = await sb.from('cadastros').insert({
+        codigo: code,
+        cliente_id: cliente.id,
+        bike_id: bike.id,
+        evento_id: eventoRow ? eventoRow.id : null,
+        loja_id: lojaRow ? lojaRow.id : null,
+        mochila: ultimoCadastro.mochila === 'Sim',
+        info_extra: ultimoCadastro.infoExtra,
+        sugestoes: ultimoCadastro.sugestoes
+      });
+      if (erroCadastro) throw erroCadastro;
+
+      // 5) Registra o primeiro passo da linha do tempo
+      await sb.from('timeline').insert({
+        bike_id: bike.id,
+        etapa: 'Cadastro realizado',
+        usuario: currentProfile ? currentProfile.nome : 'Sistema'
+      });
+
+    } catch (err) {
+      console.error(err);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Gerar meu comprovante';
+      showToast('Não foi possível salvar. Verifique sua internet e tente novamente.', 'error');
+      return;
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Gerar meu comprovante';
+    showToast('Bike cadastrada com sucesso!');
+
+    document.getElementById('ticketCode').textContent = code;
+    const body = document.getElementById('ticketBody');
+    body.innerHTML = '';
+    [
+      ['Evento', ultimoCadastro.evento],
+      ['Atleta', ultimoCadastro.nome],
+      ['Bike', `${ultimoCadastro.marca} ${ultimoCadastro.modelo}`],
+      ['Nº de série', ultimoCadastro.serie],
+      ['Loja', ultimoCadastro.loja],
+      ['Mochila', ultimoCadastro.mochila]
+    ].forEach(([k,v]) => {
+      const row = document.createElement('div');
+      row.className = 'ticket-row';
+      row.innerHTML = `<span class="k">${k}</span><span class="v mono">${v || '—'}</span>`;
+      body.appendChild(row);
+    });
+
+    showScreen('screen-ticket');
+    if (document.getElementById('screen-dashboard')) loadDashboardStats();
+  });
+
+  function buildCadastroMessage(){
+    const d = ultimoCadastro;
+    return `*NOVO CADASTRO — GERNA BIKES*\n`+
+      `Código: ${d.code}\n\n`+
+      `*Evento:* ${d.evento}\n\n`+
+      `*Atleta:* ${d.nome}\n`+
+      `*E-mail:* ${d.email}\n`+
+      `*Telefone:* ${d.telefone}\n`+
+      `*CPF:* ${d.cpf}\n`+
+      `*Equipe/Assessoria:* ${d.equipe || '—'}\n\n`+
+      `*Endereço:* ${d.endereco}, CEP ${d.cep} — ${d.cidade}\n\n`+
+      `*Bike:* ${d.marca} ${d.modelo}\n`+
+      `*Grupo:* ${d.grupo || '—'}\n`+
+      `*Cor:* ${d.cor}\n`+
+      `*Roda:* ${d.roda || '—'}\n`+
+      `*Nº de série:* ${d.serie}\n`+
+      `*Valor bike+rodas:* R$ ${d.valor}\n\n`+
+      `*Mochila com equipamentos:* ${d.mochila}\n`+
+      `*Loja credenciada:* ${d.loja}\n\n`+
+      `*Informações adicionais:* ${d.infoExtra || '—'}\n`+
+      `*Sugestões:* ${d.sugestoes || '—'}`;
+  }
+
+  function sendCadastroWhatsapp(){
+    const msg = encodeURIComponent(buildCadastroMessage());
+    window.open(`https://wa.me/${GERNA_WHATSAPP}?text=${msg}`, '_blank');
+  }
+
+  function copyCadastroSummary(){
+    navigator.clipboard.writeText(buildCadastroMessage()).then(() => {
+      showToast('Resumo copiado! Já pode colar onde precisar.');
+    });
+  }
+
+  // ================= CHECKLIST: SUBMIT =================
+  document.getElementById('formChecklist').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const required = this.querySelectorAll('[required]');
+    let ok = true;
+    required.forEach(f => { if(!f.value) ok = false; });
+
+    if(!ok){
+      document.getElementById('checklistError').style.display = 'block';
+      return;
+    }
+    document.getElementById('checklistError').style.display = 'none';
+
+    const submitBtn = this.querySelector('.submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Salvando...';
+
+    const codigoOuCpf = document.getElementById('c_codigo').value.trim();
+    const responsavel = document.getElementById('c_responsavel').value;
+    const serieConferida = document.getElementById('c_serie').value;
+
+    const entregaItems = [...document.querySelectorAll('#checklistEntrega .stamp-item')].map(el => ({
+      item: el.querySelector('.stamp-label').textContent,
+      categoria: el.dataset.categoria || 'geral',
+      status: el.classList.contains('checked') ? 'ok' : 'avaria'
+    }));
+    const devolucaoItems = [...document.querySelectorAll('#checklistDevolucao .stamp-item')].map(el => ({
+      item: el.querySelector('.stamp-label').textContent,
+      categoria: el.dataset.categoria || 'geral',
+      status: el.classList.contains('checked') ? 'ok' : 'avaria'
+    }));
+    const avariasEntrega = document.getElementById('c_avariasEntrega').value;
+    const avariasDevolucao = document.getElementById('c_avariasDevolucao').value;
+    const algumEntregaMarcado = entregaItems.some(i => i.status === 'ok');
+    const algumDevolucaoMarcado = devolucaoItems.some(i => i.status === 'ok');
+
+    try {
+      // 1) Localiza o cadastro pelo código (GB-000000) ou pelo CPF do cliente
+      let bikeId = null;
+      const { data: porCodigo } = await sb.from('cadastros').select('bike_id').eq('codigo', codigoOuCpf).maybeSingle();
+      if (porCodigo) {
+        bikeId = porCodigo.bike_id;
+      } else {
+        const { data: cliente } = await sb.from('clientes').select('id').eq('cpf', codigoOuCpf).maybeSingle();
+        if (cliente) {
+          const { data: cadastroPorCliente } = await sb.from('cadastros').select('bike_id').eq('cliente_id', cliente.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
+          if (cadastroPorCliente) bikeId = cadastroPorCliente.bike_id;
+        }
+      }
+      if (!bikeId) throw new Error('Não encontrei nenhum cadastro com esse código ou CPF. Confira se o atleta já se cadastrou.');
+
+      // 2) Grava o checklist de ENTREGA, se algum item foi marcado
+      if (algumEntregaMarcado || avariasEntrega) {
+        const { data: checklistEntrega, error: erroChkE } = await sb.from('checklists').insert({
+          bike_id: bikeId, tipo: 'entrega', responsavel, avarias: avariasEntrega
+        }).select().single();
+        if (erroChkE) throw erroChkE;
+        const respostasEntrega = entregaItems.map(i => ({
+          checklist_id: checklistEntrega.id, categoria: i.categoria, item: i.item, status: i.status
+        }));
+        await sb.from('checklist_respostas').insert(respostasEntrega);
+        await sb.from('timeline').insert({ bike_id: bikeId, etapa: 'Checklist de entrega realizado', usuario: responsavel });
+        await sb.from('bikes').update({ status: 'em_transporte', numero_serie: serieConferida || undefined }).eq('id', bikeId);
+      }
+
+      // 3) Grava o checklist de DEVOLUÇÃO, se algum item foi marcado
+      if (algumDevolucaoMarcado || avariasDevolucao) {
+        const { data: checklistDevolucao, error: erroChkD } = await sb.from('checklists').insert({
+          bike_id: bikeId, tipo: 'devolucao', responsavel, avarias: avariasDevolucao
+        }).select().single();
+        if (erroChkD) throw erroChkD;
+        const respostasDevolucao = devolucaoItems.map(i => ({
+          checklist_id: checklistDevolucao.id, categoria: i.categoria, item: i.item, status: i.status
+        }));
+        await sb.from('checklist_respostas').insert(respostasDevolucao);
+        await sb.from('timeline').insert({ bike_id: bikeId, etapa: 'Checklist de devolução realizado', usuario: responsavel });
+        await sb.from('bikes').update({ status: 'entregue' }).eq('id', bikeId);
+      }
+
+    } catch (err) {
+      console.error(err);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enviar checklist';
+      showToast('Não foi possível salvar o checklist.', 'error');
+      return;
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Enviar checklist';
+
+    const msg = `*CHECKLIST — GERNA BIKES*\n`+
+      `Loja/equipe: ${document.getElementById('c_loja').value}\n`+
+      `Atleta: ${document.getElementById('c_nome').value}\n`+
+      `Código/CPF: ${codigoOuCpf}\n`+
+      `Bike: ${document.getElementById('c_bike').value}\n`+
+      `Nº de série conferido: ${serieConferida}\n\n`+
+      `*ENTREGA — itens conferidos (${entregaItems.filter(i=>i.status==='ok').length}/${itensChecklist.length}):*\n`+
+      (algumEntregaMarcado ? entregaItems.filter(i=>i.status==='ok').map(i => `✓ ${i.item}`).join('\n') : '— nenhum item marcado —') + '\n'+
+      `Avarias na entrega: ${avariasEntrega || 'nenhuma'}\n\n`+
+      `*DEVOLUÇÃO — itens conferidos (${devolucaoItems.filter(i=>i.status==='ok').length}/${itensChecklist.length}):*\n`+
+      (algumDevolucaoMarcado ? devolucaoItems.filter(i=>i.status==='ok').map(i => `✓ ${i.item}`).join('\n') : '— nenhum item marcado —') + '\n'+
+      `Avarias na devolução: ${avariasDevolucao || 'nenhuma'}\n\n`+
+      `Conferido por: ${responsavel}`;
+
+    showToast('Checklist salvo com sucesso!');
+    window.open(`https://wa.me/${GERNA_WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank');
+    loadDashboardStats();
+    showScreen('screen-dashboard');
   });
 </script>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-close" onclick="closeLightbox()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </div>
+  <div class="lightbox-stage" id="lightboxStage">
+    <div class="lightbox-arrow prev" onclick="lightboxNav(-1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <img id="lightboxImg" alt="">
+    <div class="lightbox-arrow next" onclick="lightboxNav(1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+  </div>
+  <div class="lightbox-caption" id="lightboxCaption"></div>
+  <div class="lightbox-dots" id="lightboxDots"></div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
 
 </body>
 </html>
